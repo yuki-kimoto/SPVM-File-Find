@@ -1,0 +1,7 @@
+class TestCase::File::Find {
+  use File::Find;
+  static method test : int () {
+    
+    return 1;
+  }
+}
