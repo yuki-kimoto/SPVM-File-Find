@@ -1,4 +1,5 @@
 class File::Find {
+  use StringList;
   use File::Spec;
   use Sys;
   use Regex;
@@ -7,8 +8,6 @@ class File::Find {
 }
 
 =pod
-
-  my $Is_Win32 = $^O eq 'MSWin32';
 
   static method find : void ($cb : Handler, $top_dir : string, $options : object[]) {
     
@@ -22,70 +21,31 @@ class File::Find {
     
     my $found_files_h = Hash->new;
     
-    my $abs_dir;
-    my $is_dir;
-
-    ($topdev,$topino,$topmode) = $follow ? stat $top_item : lstat $top_item;
-
-    # canonicalize directory separators
-    $top_item =~ s|[/\\]|/|g if $Is_Win32;
-
-    # no trailing / unless path is root
-    $top_item =~ s|/\z|| unless _is_root($top_item);
-
-    $is_dir= 0;
-
-    if ($follow) {
-      if (_is_absolute($top_item)) {
-        $abs_dir = $top_item;
-      }
-      else {
-        $abs_dir = contract_name("$cwd/", $top_item);
-      }
-      $abs_dir= _resolve_symlink($abs_dir);
-      unless (defined $abs_dir) {
-          next Proc_Top_Item;
-      }
-
-      if (-d _) {
-        _find_dir_symlnk($cb, $abs_dir, $top_item);
-        $is_dir= 1;
-      }
-    }
-    else {
-      $topdir = $top_item;
-      if (-d _) {
-        _find_dir($cb, $top_item);
-        $is_dir= 1;
-      }
-      else {
-        $abs_dir= $top_item;
-      }
-    }
-
-    unless ($is_dir) {
-      unless (($_,$dir) = File::Basename::fileparse($abs_dir)) {
-          ($dir,$_) = ('./', $top_item);
-      }
-
-      $abs_dir = $dir;
-
-      $name = $abs_dir . $_; # $File::Find::name
-      $_ = $name;
-
-      $cb->();
-    }
+    &_find_dir($cb, $top_dir, $follow, $found_files_h);
   }
   
-  private static method _find_dir($cb : Handler, $dir_name : string) {
-    
+  private static method _find_dir : void ($cb : Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
+
     $cb->($dir_name, undef);
+
+    $dir_name = &_resolve_dir($dir_name, $follow, $found_files_h);
+    
+    unless ($dir_name) {
+      return;
+    }
     
     my $dir_stream = Sys::IO->opendir($dir_name);
-    my $file_base_names = Sys::IO->readdir($dir_stream);
+    my $file_base_names_list = StringList->new;
+    
+    while (my $dir_ent = Sys::IO->readdir($dir_stream)) {
+      my $file_base_name = $dir_env->d_name;
+      $file_base_names_list->push($file_base_name);
+    }
+    my $file_base_names = $file_base_names_list->to_array;
+    
     Sys::IO->closedir($dir_stream);
     
-    for my $file_base_name (@file_base_names) {
+    for my $file_base_name (@$file_base_names) {
       if (Regex->new("^\.{1,2}\z")->match($file_base_name)) {
         next;
       }
@@ -100,42 +60,49 @@ class File::Find {
     }
   }
   
-  private static method _resolve_symlink : string ($path : string, $found_files_h : Hash) {
+  private static method _resolve_dir : string ($path : string, $follow : int, $found_files_h : Hash) {
     
-    while (1) {
-      my $is_symlink = Sys::FileTest->l($path);
-      
-      unless ($is_symlink) {
-        last;
+    if ($follow) {
+      while (1) {
+        my $is_symlink = Sys::FileTest->l($path);
+        
+        unless ($is_symlink) {
+          last;
+        }
+        
+        my $lstat = Sys::IO::Stat->new;
+        Sys::IO::Stat->lstat($lstat, $path);
+        
+        my $dev = $lstat->st_dev;
+        my $inode = $lstat->st_ino;
+        
+        my $found = $found_files_h->get_int("$dev-$inode");
+        
+        if ($found) {
+          die "The $path is encountered a second time";
+        }
+        
+        my $link = Sys::IO->readlinkp($path);
+        
+        if (Sys->defined("_WIN32")) {
+          Fn->replace_chars((mutable string)$link, "\\", "/");
+        }
+        
+        my $lstat_link = Sys::IO::Stat->new;
+        my $lstat_link_status = Sys::IO::Stat->lstat($lstat_link, $link);
+        
+        if ($lstat_link_status == 0) {
+          $path = $link;
+        }
+        else {
+          $path = undef;
+          last;
+        }
       }
-      
-      my $lstat = Sys::IO::Stat->new;
-      Sys::IO::Stat->lstat($lstat, $path);
-      
-      my $dev = $lstat->st_dev;
-      my $inode = $lstat->st_ino;
-      
-      my $found = $found_files_h->get_int("$dev-$inode");
-      
-      if ($found) {
-        die "The $path is encountered a second time";
-      }
-      
-      my $link = Sys::IO->readlinkp($path);
-      
-      if (Sys->defined("_WIN32")) {
-        Fn->replace_chars((mutable string)$link, "\\", "/");
-      }
-      
-      my $lstat_link = Sys::IO::Stat->new;
-      my $lstat_link_status = Sys::IO::Stat->lstat($lstat_link, $link);
-      
-      if ($lstat_link_status == 0) {
-        $path = $link;
-      }
-      else {
+    }
+    else {
+      unless (Sys::FileTest->d($path)) {
         $path = undef;
-        last;
       }
     }
     
