@@ -1,10 +1,3 @@
-class File::Find {
-  use File::Spec;
-  use Sys;
-  use Regex;
-  
-}
-
 =pod
 
 package File::Find;
