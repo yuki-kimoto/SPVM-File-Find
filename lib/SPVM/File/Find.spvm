@@ -17,6 +17,10 @@ class File::Find {
       die "The \$top_dir must be defined";
     }
     
+    if ($top_dir eq "") {
+      die "The \$top_dir must be non-empty string";
+    }
+    
     # Options
     my $options_h = Hash->new($options);
     my $follow = $options_h->delete_or_default_int("follow", 0);
