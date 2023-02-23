@@ -7,7 +7,7 @@ class File::Find {
   use Fn;
   use File::Find::Handler;
   
-  static method find : void ($cb : File::Find::Handler, $top_dir : string, $options : object[]) {
+  static method find : void ($cb : File::Find::Handler, $top_dir : string, $options = undef : object[]) {
     
     unless ($cb) {
       die "The \$cb must be defined";
@@ -41,7 +41,7 @@ class File::Find {
     
     my $found_files_h = Hash->new;
     
-    &_find_dir($cb, $top_dir, $follow, $found_files_h);
+    &_find_dir($cb, $top_dir_slash, $follow, $found_files_h);
   }
   
   private static method _find_dir : void ($cb : File::Find::Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
@@ -65,13 +65,15 @@ class File::Find {
     
     Sys::IO->closedir($dir_stream);
     
-    for my $file_base_name (@$file_base_names) {
+    for (my $i = 0; $i < @$file_base_names; $i++) {
+      my $file_base_name = $file_base_names->[$i];
+      
       if (Regex->new("^\.{1,2}\z")->match($file_base_name)) {
         next;
       }
       
-      if (Sys::FileTest->d($file_base_name)) {
-        my $next_dir_name = "$dir_name/$file_base_name";
+      my $next_dir_name = "$dir_name/$file_base_name";
+      if (Sys::FileTest->d($next_dir_name)) {
         &_find_dir($cb, $next_dir_name, $follow, $found_files_h);
       }
       else {
