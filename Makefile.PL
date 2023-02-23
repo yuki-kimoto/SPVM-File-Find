@@ -33,8 +33,8 @@ WriteMakefile(
     resources => {
       repository => {
         type => 'git',
-        url  => '',
-        web  => '',
+        url  => 'https://github.com/yuki-kimoto/SPVM-File-Find.git',
+        web  => 'https://github.com/yuki-kimoto/SPVM-File-Find',
       },
     },
     no_index => {
@@ -44,6 +44,10 @@ WriteMakefile(
   NORECURS => 1,
   CONFIGURE_REQUIRES => {
     %configure_and_runtime_requires,
+    'SPVM::File::Spec' => '0.05',
+    'SPVM::Sys' => '0.42',
+    
+    
   },
   PREREQ_PM         => {
     %configure_and_runtime_requires,
