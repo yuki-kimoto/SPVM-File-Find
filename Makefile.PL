@@ -44,13 +44,13 @@ WriteMakefile(
   NORECURS => 1,
   CONFIGURE_REQUIRES => {
     %configure_and_runtime_requires,
+  },
+  PREREQ_PM         => {
+    %configure_and_runtime_requires,
     'SPVM::File::Spec' => '0.05',
     'SPVM::Sys' => '0.42',
     'SPVM::Regex' => '0.19',
     'SPVM::File::Basename' => '0.02',
-  },
-  PREREQ_PM         => {
-    %configure_and_runtime_requires,
   },
   TEST_REQUIRES => {
     
