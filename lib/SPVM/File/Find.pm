@@ -6,13 +6,11 @@ our $VERSION = '0.02';
 
 =head1 Name
 
-SPVM::File::Find - Short Description
+SPVM::File::Find - Finding Files in Subdirectories
 
 =head1 Description
 
-C<SPVM::File::Find> is the C<File::Find> class in L<SPVM> language.
-
-The C<File::Find> class has methods to get files under a directory.
+The File::Find class of L<SPVM> has methods to find files in subdirectories.
 
 =head1 Usage
 
@@ -74,8 +72,7 @@ Yuki Kimoto C<kimoto.yuki@gmail.com>
 
 =head1 Copyright & License
 
-Copyright 2023-2023 Yuki Kimoto, all rights reserved.
+Copyright (c) 2023 Yuki Kimoto
 
-This program is free software; you can redistribute it and/or modify it
-under the same terms as Perl itself.
+MIT License
 

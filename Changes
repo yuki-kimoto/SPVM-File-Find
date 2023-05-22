@@ -1,3 +1,10 @@
+0.03 2023-04-28
+  [Prerequirement Changes]
+    * SPVM 0.971008+ is required.
+  [Meta Information Fix]
+    * Fixed the repository URL.
+  [License Change]
+    * The license is changed to MIT License.
 0.02 2023-03-15
   [Prerequirement Changes]
     * SPVM::Sys 0.43+ is needed.
