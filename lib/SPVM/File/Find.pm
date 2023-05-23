@@ -20,7 +20,7 @@ The File::Find class of L<SPVM> has methods to find files in subdirectories.
   
   my $files_list = StringList->new;
   
-  File::Find->find([$files_list : StringList] method : void ($dir : string, $file_base_name : string) {
+  File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
     my $file = $dir;
     if ($file_base_name) {
       $file .= "/$file_base_name";
@@ -38,13 +38,13 @@ Gets file names:
   
   my $files_list = StringList->new;
   
-  File::Find->find([$files_list : StringList] method : void ($dir : string, $file_base_name : string) {
+  File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
     my $file = $dir;
     if ($file_base_name) {
       $file .= "/$file_base_name";
     }
     
-    $files_list->push($file);
+    $self->{files_list}->push($file);
     
   }, $dir);
   
