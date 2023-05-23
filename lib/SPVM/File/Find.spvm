@@ -2,6 +2,8 @@
 # MIT License
 
 class File::Find {
+  version "0.020";
+  
   use StringList;
   use File::Spec;
   use Sys;
