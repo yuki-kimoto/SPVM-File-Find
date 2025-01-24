@@ -10,7 +10,7 @@ SPVM::File::Find - Finding Files in Subdirectories
 
 =head1 Description
 
-The File::Find class of L<SPVM> has methods to find files in subdirectories.
+File::Find class in L<SPVM> has methods to find files in subdirectories.
 
 =head1 Usage
 
