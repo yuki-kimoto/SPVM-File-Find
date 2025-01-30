@@ -1,3 +1,6 @@
+0.024 2025-01-30
+  [Bug Fix]
+    * Fix a regex not loading bug.
 0.023 2025-01-30
   [Internal Changes]
     * Use Re class instead of Regex class.
