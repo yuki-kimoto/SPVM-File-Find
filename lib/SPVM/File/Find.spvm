@@ -13,6 +13,7 @@ class File::Find {
   use Fn;
   use File::Find::Handler;
   use Sys::OS;
+  use Re;
   
   static method find : void ($cb : File::Find::Handler, $top_dir : string, $options : object[] = undef) {
     
@@ -46,7 +47,7 @@ class File::Find {
     }
     
     # The trailing "/" is removed
-    unless (File::Spec->file_name_is_root($top_dir_slash)) {
+    unless (&_is_root($top_dir_slash)) {
       my $top_dir_slash_ref = [$top_dir_slash];
       
       Re->s($top_dir_slash_ref, "/\z", "");
@@ -57,6 +58,13 @@ class File::Find {
     my $found_files_h = Hash->new;
     
     &_find_dir($cb, $top_dir_slash, $follow, $found_files_h);
+  }
+  
+  private static method _is_root : int ($path : string) {
+    if (Sys::OS->is_windows) {
+      return !!Re->m($path, "^(?:[A-Za-z]:)?/\z");
+    }
+    return $path eq "/";
   }
   
   private static method _find_dir : void ($cb : File::Find::Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
