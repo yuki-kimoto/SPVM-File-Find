@@ -2,7 +2,7 @@
 # MIT License
 
 class File::Find {
-  version "0.024";
+  version "0.025";
   
   use StringList;
   use File::Spec;
