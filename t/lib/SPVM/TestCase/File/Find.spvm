@@ -35,7 +35,9 @@ class TestCase::File::Find {
         "lib/SPVM/File/Find.pm",
         "lib/SPVM/File/Find.spvm",
         "lib/SPVM/File/Find/Handler.pm",
-        "lib/SPVM/File/Find/Handler.spvm"
+        "lib/SPVM/File/Find/Handler.spvm",
+        "lib/SPVM/File/Find/Info.pm",
+        "lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -70,7 +72,9 @@ class TestCase::File::Find {
         "lib/SPVM/File/Find.pm",
         "lib/SPVM/File/Find.spvm",
         "lib/SPVM/File/Find/Handler.pm",
-        "lib/SPVM/File/Find/Handler.spvm"
+        "lib/SPVM/File/Find/Handler.spvm",
+        "lib/SPVM/File/Find/Info.pm",
+        "lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -105,14 +109,16 @@ class TestCase::File::Find {
         "lib/SPVM/File/Find.pm",
         "lib/SPVM/File/Find.spvm",
         "lib/SPVM/File/Find/Handler.pm",
-        "lib/SPVM/File/Find/Handler.spvm"
+        "lib/SPVM/File/Find/Handler.spvm",
+        "lib/SPVM/File/Find/Info.pm",
+        "lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
         return 0;
       }
     }
-
+    
     {
       my $cwd = Cwd->getcwd;
       
@@ -142,14 +148,16 @@ class TestCase::File::Find {
         "$dir/SPVM/File/Find.pm",
         "$dir/SPVM/File/Find.spvm",
         "$dir/SPVM/File/Find/Handler.pm",
-        "$dir/SPVM/File/Find/Handler.spvm"
+        "$dir/SPVM/File/Find/Handler.spvm",
+        "$dir/SPVM/File/Find/Info.pm",
+        "$dir/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
         return 0;
       }
     }
-
+    
     {
       my $cwd = Cwd->getcwd;
       
@@ -182,14 +190,16 @@ class TestCase::File::Find {
         "$dir_no_slash/SPVM/File/Find.pm",
         "$dir_no_slash/SPVM/File/Find.spvm",
         "$dir_no_slash/SPVM/File/Find/Handler.pm",
-        "$dir_no_slash/SPVM/File/Find/Handler.spvm"
+        "$dir_no_slash/SPVM/File/Find/Handler.spvm",
+        "$dir_no_slash/SPVM/File/Find/Info.pm",
+        "$dir_no_slash/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
         return 0;
       }
     }
-
+    
     {
       Sys::IO->chdir("lib");
       my $dir = ".";
@@ -218,7 +228,9 @@ class TestCase::File::Find {
         "./SPVM/File/Find.pm",
         "./SPVM/File/Find.spvm",
         "./SPVM/File/Find/Handler.pm",
-        "./SPVM/File/Find/Handler.spvm"
+        "./SPVM/File/Find/Handler.spvm",
+        "./SPVM/File/Find/Info.pm",
+        "./SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -226,7 +238,6 @@ class TestCase::File::Find {
       }
       Sys::IO->chdir("..");
     }
-    
     
     return 1;
   }

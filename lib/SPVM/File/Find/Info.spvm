@@ -1,0 +1,18 @@
+# Copyright (c) 2025 Yuki Kimoto
+# MIT License
+
+class File::Find::Info {
+  version_from File::Find;
+  
+  allow File::Find;
+  
+  # Fields
+  has dir : ro string;
+  
+  has name : ro string;
+  
+  has _ : ro string;
+  
+  has fullname : ro string;
+  
+}

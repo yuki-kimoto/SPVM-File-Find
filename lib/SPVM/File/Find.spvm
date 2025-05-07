@@ -4,6 +4,9 @@
 class File::Find {
   version "0.025";
   
+  use File::Find::Info;
+  use File::Find::Handler;
+  
   use StringList;
   use Sys;
   use Regex;
