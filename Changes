@@ -7,6 +7,14 @@
       [After]
       static method find : void ($wanted_or_options : object of File::Find::Handler|object[], $dir : string);
       
+    * Changes the arguments of File::Find::Handler interface.
+    
+      [Before]
+      required method : void ($dir : string, $file_base_name : string);
+      
+      [After]
+      required method : void ($info : File::Find::Info);
+      
 0.025 2025-05-07
   [Internal Changes]
     * Do not use File::Spec#file_name_is_root method.

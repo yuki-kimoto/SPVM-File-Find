@@ -87,9 +87,13 @@ class File::Find {
   }
   
   private static method _find_dir : void ($wanted : File::Find::Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
-
-    $wanted->($dir_name, undef);
-
+    
+    my $info = File::Find::Info->new;
+    
+    $info->{dir} = $dir_name;
+    
+    $wanted->($info);
+    
     $dir_name = &_resolve_dir($dir_name, $follow, $found_files_h);
     
     unless ($dir_name) {
@@ -119,7 +123,12 @@ class File::Find {
         &_find_dir($wanted, $next_dir_name, $follow, $found_files_h);
       }
       else {
-        $wanted->($dir_name, $file_base_name);
+        my $info = File::Find::Info->new;
+        $info->{dir} = $dir_name;
+        $info->{name} = $file_base_name;
+        $info->{_} = $file_base_name;
+        
+        $wanted->($info);
       }
     }
   }

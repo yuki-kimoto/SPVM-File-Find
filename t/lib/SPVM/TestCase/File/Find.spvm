@@ -13,7 +13,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";
@@ -50,7 +53,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find({wanted => [has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find({wanted => [has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";
@@ -87,7 +93,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";
@@ -126,7 +135,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";
@@ -165,7 +177,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";
@@ -206,7 +221,10 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+      File::Find->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        my $dir = $info->dir;
+        my $file_base_name = $info->name;
+        
         my $file = $dir;
         if ($file_base_name) {
           $file .= "/$file_base_name";

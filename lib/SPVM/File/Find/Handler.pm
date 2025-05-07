@@ -6,11 +6,11 @@ package SPVM::File::Find::Handler;
 
 =head1 Name
 
-SPVM::File::Find::Handler - Handler for File::Find
+SPVM::File::Find::Handler - Callback for File::Find#find Method
 
 =head1 Description
 
-The File::Find::Handler class of L<SPVM> has interface methods for the handler of L<File::Find|SPVM::File::Find>.
+File::Find::Handler class in L<SPVM> has interface methods for the callback for L<File::Find#find|SPVM::File::Find/"find"> method.
 
 =head1 Usage
 
@@ -18,7 +18,7 @@ The File::Find::Handler class of L<SPVM> has interface methods for the handler o
 
 =head1 Interface Methods
 
-  required method : void ($dir : string, $file_base_name : string);
+C<required method : void ($info : L<File::Find::Info|SPVM::File::Find::Info>);>
 
 =head1 Copyright & License
 

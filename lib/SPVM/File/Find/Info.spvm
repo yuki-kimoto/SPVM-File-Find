@@ -6,6 +6,14 @@ class File::Find::Info {
   
   allow File::Find;
   
+  # Class Methods
+  private static method new : File::Find::Info () {
+    
+    my $self = new File::Find::Info;
+    
+    return $self;
+  }
+  
   # Fields
   has dir : ro string;
   
