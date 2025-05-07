@@ -17,6 +17,9 @@ class File::Find {
   use Sys::OS;
   use Re;
   
+  # Undocumented Class Variables
+  our $SLnkSeen : Hash of string;
+  
   # Fields
   has bydepth : ro byte;
   
@@ -34,6 +37,8 @@ class File::Find {
   
   has no_chdir : ro byte;
   
+  has dont_use_nlink : ro byte;
+  
   # Class Methods
   static method new : File::Find ($options : object[] = undef) {
     
@@ -48,6 +53,7 @@ class File::Find {
       "follow_skip",
       "dangling_symlinks",
       "no_chdir",
+      "dont_use_nlink"
     ];
     
     Fn->check_option_names($options, $option_names);
@@ -69,6 +75,8 @@ class File::Find {
     $self->{dangling_symlinks} = $options_h->get("dangling_symlinks");
     
     $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
+    
+    $self->{dont_use_nlink} = (byte)$options_h->get_or_default_int("dont_use_nlink", 1);
     
     return $self;
   }
