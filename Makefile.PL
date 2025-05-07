@@ -50,9 +50,9 @@ WriteMakefile(
     'SPVM::Sys' => '0.509',
     'SPVM::Regex' => '0.246',
     'SPVM::File::Basename' => '0.02',
+    'SPVM::File::Spec' => '0.087',
   },
   TEST_REQUIRES => {
-    'SPVM::File::Spec' => '0.05',
   },
 );
 

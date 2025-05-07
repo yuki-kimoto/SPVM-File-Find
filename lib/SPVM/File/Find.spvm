@@ -17,6 +17,7 @@ class File::Find {
   use Sys::OS;
   use Re;
   use Hash;
+  use File::Spec;
   
   # Fields
   has bydepth : ro byte;
@@ -39,6 +40,8 @@ class File::Find {
   
   # Undocumented Fields
   has SLnkSeen : Hash of string;
+  
+  has current_dir : string;
   
   # Class Methods
   static method new : File::Find ($options : object[] = undef) {
@@ -80,6 +83,8 @@ class File::Find {
     $self->{dont_use_nlink} = (byte)$options_h->get_or_default_int("dont_use_nlink", 1);
     
     $self->{SLnkSeen} = Hash->new;
+    
+    $self->{current_dir} = File::Spec->curdir // ".";
     
     return $self;
   }
