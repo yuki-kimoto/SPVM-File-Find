@@ -4,6 +4,7 @@ class TestCase::File::Find {
   use Sort;
   use Array;
   use Sys::IO;
+  use Cwd;
   
   static method test : int () {
     
