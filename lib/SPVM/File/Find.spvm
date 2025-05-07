@@ -16,6 +16,7 @@ class File::Find {
   use File::Find::Callback;
   use Sys::OS;
   use Re;
+  use Hash;
   
   # Fields
   has bydepth : ro byte;
@@ -77,6 +78,8 @@ class File::Find {
     $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
     
     $self->{dont_use_nlink} = (byte)$options_h->get_or_default_int("dont_use_nlink", 1);
+    
+    $self->{SLnkSeen} = Hash->new;
     
     return $self;
   }
