@@ -25,22 +25,29 @@ class File::Find {
     
     my $wanted = (File::Find::Callback)undef;
     my $follow = 0;
+    my $no_chdir = 0;
     if ($wanted_or_options isa File::Find::Callback) {
       $wanted = (File::Find::Callback)$wanted_or_options;
     }
     elsif ($wanted_or_options isa object[]) {
       my $options = (object[])$wanted_or_options;
       
-      Fn->check_option_names($options, ["follow", "wanted"]);
+      Fn->check_option_names($options, ["follow", "wanted", "no_chdir"]);
       
       my $options_h = Hash->new($options);
       
       $follow = $options_h->get_or_default_int("follow", 0);
       
       $wanted = (File::Find::Callback)$options_h->get("wanted");
+      
+      $no_chdir = $options_h->get_or_default_int("no_chdir", 0);
     }
     else {
       die "The type of \$wanted_or_options must be File::Find::Callback or object[].";
+    }
+    
+    unless ($no_chdir) {
+      die "TODO:no no_chdir logic.";
     }
     
     unless ($wanted) {
