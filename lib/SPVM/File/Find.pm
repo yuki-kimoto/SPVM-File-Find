@@ -52,13 +52,11 @@ Gets file names:
 
 =head1 Class Methods
 
-  static method find : void ($cb : File::Find::Handler, $top_dir : string, $options : object[] = undef);
+C<static method find : void ($wanted_or_options : object of File::Find::Handler|object[], $dir : string);>
 
-Iterates each file recursively under the $top_dir and calls the $cb by the file.
+Iterates each file recursively under the $top_dir and calls $wanted_or_options by the file.
 
-=head1 See also
-
-=head2 File::Find
+=head1 Porting
 
 C<SPVM::File::Find> is a Perl's L<File::Find> porting to L<SPVM>.
 

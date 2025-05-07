@@ -14,25 +14,42 @@ class File::Find {
   use Sys::OS;
   use Re;
   
-  static method find : void ($cb : File::Find::Handler, $dir : string, $options : object[] = undef) {
+  static method find : void ($wanted_or_options : object of File::Find::Handler|object[], $dir : string) {
     
-    unless ($cb) {
-      die "The \$cb must be defined";
+    unless ($wanted_or_options) {
+      die "\$wanted_or_options must be defined";
+    }
+    
+    my $wanted = (File::Find::Handler)undef;
+    my $follow = 0;
+    if ($wanted_or_options isa File::Find::Handler) {
+      $wanted = (File::Find::Handler)$wanted_or_options;
+    }
+    elsif ($wanted_or_options isa object[]) {
+      my $options = (object[])$wanted_or_options;
+      
+      Fn->check_option_names($options, ["follow", "wanted"]);
+      
+      my $options_h = Hash->new($options);
+      
+      $follow = $options_h->get_or_default_int("follow", 0);
+      
+      $wanted = (File::Find::Handler)$options_h->get("wanted");
+    }
+    else {
+      die "The type of \$wanted_or_options must be File::Find::Handler or object[].";
+    }
+    
+    unless ($wanted) {
+      die "The wanted callback must be defined.";
     }
     
     unless ($dir) {
-      die "The \$dir must be defined";
+      die "\$dir must be defined";
     }
     
     if ($dir eq "") {
       die "The \$dir must be non-empty string";
-    }
-    
-    # Options
-    my $options_h = Hash->new($options);
-    my $follow = $options_h->delete_or_default_int("follow", 0);
-    for my $name (@{$options_h->keys}) {
-      die "The \"$name\" option is invalid";
     }
     
     # The path separator is converted to "/"
@@ -56,7 +73,7 @@ class File::Find {
     
     my $found_files_h = Hash->new;
     
-    &_find_dir($cb, $dir_slash, $follow, $found_files_h);
+    &_find_dir($wanted, $dir_slash, $follow, $found_files_h);
   }
   
   private static method _is_root : int ($path : string) {
@@ -66,9 +83,9 @@ class File::Find {
     return $path eq "/";
   }
   
-  private static method _find_dir : void ($cb : File::Find::Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
+  private static method _find_dir : void ($wanted : File::Find::Handler, $dir_name : string, $follow : int, $found_files_h : Hash) {
 
-    $cb->($dir_name, undef);
+    $wanted->($dir_name, undef);
 
     $dir_name = &_resolve_dir($dir_name, $follow, $found_files_h);
     
@@ -96,10 +113,10 @@ class File::Find {
       
       my $next_dir_name = "$dir_name/$file_base_name";
       if (Sys->d($next_dir_name)) {
-        &_find_dir($cb, $next_dir_name, $follow, $found_files_h);
+        &_find_dir($wanted, $next_dir_name, $follow, $found_files_h);
       }
       else {
-        $cb->($dir_name, $file_base_name);
+        $wanted->($dir_name, $file_base_name);
       }
     }
   }
