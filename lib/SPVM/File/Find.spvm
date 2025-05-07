@@ -17,9 +17,6 @@ class File::Find {
   use Sys::OS;
   use Re;
   
-  # Undocumented Class Variables
-  our $SLnkSeen : Hash of string;
-  
   # Fields
   has bydepth : ro byte;
   
@@ -38,6 +35,9 @@ class File::Find {
   has no_chdir : ro byte;
   
   has dont_use_nlink : ro byte;
+  
+  # Undocumented Fields
+  has SLnkSeen : Hash of string;
   
   # Class Methods
   static method new : File::Find ($options : object[] = undef) {
