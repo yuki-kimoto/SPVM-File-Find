@@ -39,7 +39,7 @@ class File::Find {
   has dont_use_nlink : ro byte;
   
   # Undocumented Fields
-  has SLnkSeen : Hash of string;
+  has SLnkSeen : Hash of Int;
   
   has current_dir : string;
   
@@ -197,7 +197,79 @@ class File::Find {
     }
     return $AbsName;
   }
-
+  
+  private method Follow_SymLink : string ($AbsName : string) {
+    
+    my $NewName = (string)undef;
+    
+    my $lstat = Sys->lstat($AbsName);
+    my $DEV = $lstat->st_dev;
+    my $INO = $lstat->st_ino;
+    
+    my $SLnkSeen = $self->{SLnkSeen};
+    
+    my $follow_skip = $self->{follow_skip};
+    
+    my $dangling_symbolic_link = 0;
+    while ($lstat->l) {
+      
+      my $dev_ino_count = $SLnkSeen->get_int("$DEV\034$INO");
+      
+      if ($dev_ino_count) {
+        if ($follow_skip < 2) {
+          die "$AbsName is encountered a second time";
+        }
+        else {
+          return undef;
+        }
+      }
+      $dev_ino_count++;
+      $SLnkSeen->set("$DEV\034$INO", $dev_ino_count);
+      
+      my $Link = Sys->readlink($AbsName);
+      # canonicalize directory separators
+      if (Sys::OS->is_windows) {
+        Re->s(my $_ = [$Link], ["\\", "g"], "/");
+        $Link = $_->[0];
+      }
+      $NewName= $self->PathCombine($AbsName, $Link);
+      unless ($NewName) {
+        if ($follow_skip < 2) {
+          die "$AbsName is a recursive symbolic link";
+        }
+        else {
+          return undef;
+        }
+      }
+      else {
+        $AbsName= $NewName;
+      }
+      
+      $lstat = Sys->lstat($AbsName);
+      $DEV = $lstat->st_dev;
+      $INO = $lstat->st_ino;
+      
+      #  dangling symbolic link
+      eval { Sys->stat($AbsName); }
+      if ($@) {
+        $dangling_symbolic_link = 1;
+        return undef;
+      }
+    }
+    
+    my $full_check = $self->{follow} || $self->{follow_fast};
+    if ($full_check && !$dangling_symbolic_link && (my $_ = $SLnkSeen->get_int("$DEV\034$INO"), $SLnkSeen->set("$DEV\034$INO", $_ + 1), $_)) {
+      if ( ($follow_skip < 1) || (($lstat->d) && ($follow_skip < 2)) ) {
+        die "$AbsName encountered a second time";
+      }
+      else {
+        return undef;
+      }
+    }
+    
+    return $AbsName;
+  }
+  
   private static method _find_dir : void ($wanted : File::Find::Callback, $dir_name : string, $follow : int, $found_files_h : Hash) {
     
     my $info = File::Find::Info->new;
