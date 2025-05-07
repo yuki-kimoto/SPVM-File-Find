@@ -23,4 +23,6 @@ class File::Find::Info {
   
   has fullname : ro string;
   
+  has prune : rw byte;
+  
 }
