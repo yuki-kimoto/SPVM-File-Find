@@ -7,8 +7,10 @@
 Changes
 lib/SPVM/File/Find.pm
 lib/SPVM/File/Find.spvm
-lib/SPVM/File/Find/Handler.pm
-lib/SPVM/File/Find/Handler.spvm
+lib/SPVM/File/Find/Callback.pm
+lib/SPVM/File/Find/Callback.spvm
+lib/SPVM/File/Find/Info.pm
+lib/SPVM/File/Find/Info.spvm
 LICENSE
 Makefile.PL
 MANIFEST			This list of files

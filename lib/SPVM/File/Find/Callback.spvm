@@ -1,7 +1,7 @@
 # Copyright (c) 2023 Yuki Kimoto
 # MIT License
 
-class File::Find::Handler : interface_t {
+class File::Find::Callback : interface_t {
   version_from File::Find;
   
   use File::Find::Info;

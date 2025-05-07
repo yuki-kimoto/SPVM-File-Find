@@ -52,7 +52,7 @@ Gets file names:
 
 =head1 Class Methods
 
-C<static method find : void ($wanted_or_options : object of File::Find::Handler|object[], $dir : string);>
+C<static method find : void ($wanted_or_options : object of File::Find::Callback|object[], $dir : string);>
 
 Iterates each file recursively under the $top_dir and calls $wanted_or_options by the file.
 
