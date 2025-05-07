@@ -1,11 +1,13 @@
 0.026 2025-05-07
   [Incompatible Changes]
+    * File::Find becomes a object-oriented class. new method is added.
+    
     * Changes the arguments of Fine::Find#find method.
       [Before]
       static method find : void ($cb : File::Find::Handler, $dir : string, $options : object[] = undef);
       
       [After]
-      static method find : void ($wanted_or_options : object of File::Find::Handler|object[], $dir : string);
+      method find : void ($cb : File::Find::Handler, $dir : string);
       
     * Changes the arguments of File::Find::Handler interface.
     

@@ -18,9 +18,10 @@ File::Find class in L<SPVM> has methods to find files in subdirectories.
   
   my $dir = "lib";
   
-  my $files_list = StringList->new;
-  
-  File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+  File::Find->new({no_chdir => 1})->find(method : void ($info : File::Find::Info) {
+    my $dir = $info->dir;
+    my $file_base_name = $info->name;
+    
     my $file = $dir;
     if ($file_base_name) {
       $file .= "/$file_base_name";
@@ -38,7 +39,10 @@ Gets file names:
   
   my $files_list = StringList->new;
   
-  File::Find->find([has files_list : StringList = $files_list] method : void ($dir : string, $file_base_name : string) {
+  File::Find->new({no_chdir => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+    my $dir = $info->dir;
+    my $file_base_name = $info->name;
+    
     my $file = $dir;
     if ($file_base_name) {
       $file .= "/$file_base_name";
@@ -50,11 +54,21 @@ Gets file names:
   
   my $files = $files_list->to_array;
 
+=head1 Fields
+
 =head1 Class Methods
 
-C<static method find : void ($wanted_or_options : object of File::Find::Callback|object[], $dir : string);>
+=head2 new
 
-Iterates each file recursively under the $top_dir and calls $wanted_or_options by the file.
+C<static method new : File::Find ($options : object[] = undef);>
+
+Creates a new File::Find object and returns it.
+
+=head1 Instance Methods
+
+C<method find : void ($cb : File::Find::Callback, $dir : string);>
+
+Iterates each file recursively under the $dir and calls the callback $cb by the file.
 
 =head1 Porting
 

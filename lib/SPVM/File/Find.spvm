@@ -17,41 +17,45 @@ class File::Find {
   use Sys::OS;
   use Re;
   
-  static method find : void ($wanted_or_options : object of File::Find::Callback|object[], $dir : string) {
+  # Fields
+  has no_chdir : ro byte;
+  
+  has follow : ro byte;
+  
+  # Class Methods
+  static method new : File::Find ($options : object[] = undef) {
     
-    unless ($wanted_or_options) {
-      die "\$wanted_or_options must be defined";
+    my $self = new File::Find;
+    
+    my $option_names = [
+      "follow",
+      "no_chdir",
+    ];
+    
+    Fn->check_option_names($options, $option_names);
+    
+    my $options_h = Hash->new($options);
+    
+    $self->{follow} = (byte)$options_h->get_or_default_int("follow", 0);
+    
+    $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
+    
+    return $self;
+  }
+  
+  # Instance Methods
+  method find : void ($cb : File::Find::Callback, $dir : string) {
+    
+    unless ($cb) {
+      die "The callback \$cb must be defined";
     }
     
-    my $wanted = (File::Find::Callback)undef;
-    my $follow = 0;
-    my $no_chdir = 0;
-    if ($wanted_or_options isa File::Find::Callback) {
-      $wanted = (File::Find::Callback)$wanted_or_options;
-    }
-    elsif ($wanted_or_options isa object[]) {
-      my $options = (object[])$wanted_or_options;
-      
-      Fn->check_option_names($options, ["follow", "wanted", "no_chdir"]);
-      
-      my $options_h = Hash->new($options);
-      
-      $follow = $options_h->get_or_default_int("follow", 0);
-      
-      $wanted = (File::Find::Callback)$options_h->get("wanted");
-      
-      $no_chdir = $options_h->get_or_default_int("no_chdir", 0);
-    }
-    else {
-      die "The type of \$wanted_or_options must be File::Find::Callback or object[].";
-    }
+    my $no_chdir = $self->{no_chdir};
+    
+    my $follow = $self->{follow};
     
     unless ($no_chdir) {
       die "TODO:no no_chdir logic.";
-    }
-    
-    unless ($wanted) {
-      die "The wanted callback must be defined.";
     }
     
     unless ($dir) {
@@ -83,7 +87,7 @@ class File::Find {
     
     my $found_files_h = Hash->new;
     
-    &_find_dir($wanted, $dir_slash, $follow, $found_files_h);
+    &_find_dir($cb, $dir_slash, $follow, $found_files_h);
   }
   
   private static method _is_root : int ($path : string) {
