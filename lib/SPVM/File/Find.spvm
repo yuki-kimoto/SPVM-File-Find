@@ -40,7 +40,13 @@ class File::Find {
     my $self = new File::Find;
     
     my $option_names = [
+      "bydepth",
+      "preprocess",
+      "postprocess",
       "follow",
+      "follow_fast",
+      "follow_skip",
+      "dangling_symlinks",
       "no_chdir",
     ];
     
@@ -48,7 +54,19 @@ class File::Find {
     
     my $options_h = Hash->new($options);
     
+    $self->{bydepth} = (byte)$options_h->get_or_default_int("bydepth", 0);
+    
+    $self->{preprocess} = (File::Find::Callback)$options_h->get("preprocess");
+    
+    $self->{postprocess} = (File::Find::Callback)$options_h->get("postprocess");
+    
     $self->{follow} = (byte)$options_h->get_or_default_int("follow", 0);
+    
+    $self->{follow_fast} = (byte)$options_h->get_or_default_int("follow_fast", 0);
+    
+    $self->{follow_skip} = (byte)$options_h->get_or_default_int("follow_skip", 1);
+    
+    $self->{dangling_symlinks} = $options_h->get("dangling_symlinks");
     
     $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
     
