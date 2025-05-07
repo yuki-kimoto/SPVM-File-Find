@@ -18,9 +18,21 @@ class File::Find {
   use Re;
   
   # Fields
-  has no_chdir : ro byte;
+  has bydepth : ro byte;
+  
+  has preprocess : File::Find::Callback;
+  
+  has postprocess : File::Find::Callback;
   
   has follow : ro byte;
+  
+  has follow_fast : ro byte;
+  
+  has follow_skip : ro byte;
+  
+  has dangling_symlinks : ro object;
+  
+  has no_chdir : ro byte;
   
   # Class Methods
   static method new : File::Find ($options : object[] = undef) {
