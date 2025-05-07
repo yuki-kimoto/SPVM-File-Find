@@ -136,6 +136,32 @@ class File::Find {
     &_find_dir($cb, $dir_slash, $follow, $found_files_h);
   }
   
+  private method contract_name : string ($info : File::Find::Info, $cdir : string, $fn : string) {
+    
+    if ($fn eq $self->{current_dir}) {
+      return Fn->substr($cdir, 0, Fn->rindex($cdir, "/"));
+    }
+    
+    $cdir = Fn->substr($cdir, 0, Fn->rindex($cdir, "/") + 1);
+    
+    Re->s(my $_ = [$fn], "^\./", "");
+    $fn = $_->[0];
+    
+    my $abs_name = $cdir . $fn;
+    
+    if (Fn->substr($fn, 0, 3) eq "../") {
+      while (1) {
+        my $rep = Re->s(my $_ = [$abs_name], "/[^/]*/\.\./+", "/");
+        $abs_name = $_->[0];
+        unless ($rep) {
+          last;
+        }
+      }
+    }
+    
+    return $abs_name;
+  }
+
   private static method _is_absolute : int ($path : string) {
     if (Sys::OS->is_windows) {
       return !!Re->m($path, "^(?:[A-Za-z]:)?/");
