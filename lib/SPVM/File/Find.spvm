@@ -14,18 +14,18 @@ class File::Find {
   use Sys::OS;
   use Re;
   
-  static method find : void ($cb : File::Find::Handler, $top_dir : string, $options : object[] = undef) {
+  static method find : void ($cb : File::Find::Handler, $dir : string, $options : object[] = undef) {
     
     unless ($cb) {
       die "The \$cb must be defined";
     }
     
-    unless ($top_dir) {
-      die "The \$top_dir must be defined";
+    unless ($dir) {
+      die "The \$dir must be defined";
     }
     
-    if ($top_dir eq "") {
-      die "The \$top_dir must be non-empty string";
+    if ($dir eq "") {
+      die "The \$dir must be non-empty string";
     }
     
     # Options
@@ -36,27 +36,27 @@ class File::Find {
     }
     
     # The path separator is converted to "/"
-    my $top_dir_slash = (string)undef;
+    my $dir_slash = (string)undef;
     if (Sys::OS->is_windows) {
-      $top_dir_slash = copy $top_dir;
-      Fn->replace_chars((mutable string)$top_dir_slash, '\\', '/');
+      $dir_slash = copy $dir;
+      Fn->replace_chars((mutable string)$dir_slash, '\\', '/');
     }
     else {
-      $top_dir_slash = $top_dir;
+      $dir_slash = $dir;
     }
     
     # The trailing "/" is removed
-    unless (&_is_root($top_dir_slash)) {
-      my $top_dir_slash_ref = [$top_dir_slash];
+    unless (&_is_root($dir_slash)) {
+      my $dir_slash_ref = [$dir_slash];
       
-      Re->s($top_dir_slash_ref, "/\z", "");
+      Re->s($dir_slash_ref, "/\z", "");
       
-      $top_dir_slash = $top_dir_slash_ref->[0];
+      $dir_slash = $dir_slash_ref->[0];
     }
     
     my $found_files_h = Hash->new;
     
-    &_find_dir($cb, $top_dir_slash, $follow, $found_files_h);
+    &_find_dir($cb, $dir_slash, $follow, $found_files_h);
   }
   
   private static method _is_root : int ($path : string) {
