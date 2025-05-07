@@ -120,6 +120,13 @@ class File::Find {
     &_find_dir($cb, $dir_slash, $follow, $found_files_h);
   }
   
+  private static method _is_absolute : int ($path : string) {
+    if (Sys::OS->is_windows) {
+      return !!Re->m($path, "^(?:[A-Za-z]:)?/");
+    }
+    return length $path && $path->[0] == '/';
+  }
+  
   private static method _is_root : int ($path : string) {
     if (Sys::OS->is_windows) {
       return !!Re->m($path, "^(?:[A-Za-z]:)?/\z");
@@ -222,6 +229,7 @@ class File::Find {
     
     return $path;
   }
+  
 }
 
 __END__
