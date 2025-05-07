@@ -136,7 +136,7 @@ class File::Find {
     &_find_dir($cb, $dir_slash, $follow, $found_files_h);
   }
   
-  private method contract_name : string ($info : File::Find::Info, $cdir : string, $fn : string) {
+  private method contract_name : string ($cdir : string, $fn : string) {
     
     if ($fn eq $self->{current_dir}) {
       return Fn->substr($cdir, 0, Fn->rindex($cdir, "/"));
@@ -176,6 +176,28 @@ class File::Find {
     return $path eq "/";
   }
   
+  private method PathCombine : string ($Base : string, $Name : string) {
+    my $AbsName : string;
+    
+    if (&_is_absolute($Name)) {
+      $AbsName= $Name;
+    }
+    else {
+      $AbsName= $self->contract_name($Base, $Name);
+    }
+    
+    # (simple) check for recursion
+    my $newlen= length($AbsName);
+    if ($newlen <= length($Base)) {
+      if (($newlen == length($Base) || Fn->substr($Base, $newlen, 1) eq "/")
+          && $AbsName eq Fn->substr($Base, 0, $newlen))
+      {
+        return undef;
+      }
+    }
+    return $AbsName;
+  }
+
   private static method _find_dir : void ($wanted : File::Find::Callback, $dir_name : string, $follow : int, $found_files_h : Hash) {
     
     my $info = File::Find::Info->new;
