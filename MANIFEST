@@ -9,6 +9,8 @@ lib/SPVM/File/Find.pm
 lib/SPVM/File/Find.spvm
 lib/SPVM/File/Find/Callback.pm
 lib/SPVM/File/Find/Callback.spvm
+lib/SPVM/File/Find/Callback/DanglingSymlinks.pm
+lib/SPVM/File/Find/Callback/DanglingSymlinks.spvm
 lib/SPVM/File/Find/Info.pm
 lib/SPVM/File/Find/Info.spvm
 LICENSE
@@ -18,3 +20,9 @@ MANIFEST.SKIP
 README.md
 t/basic.t
 t/lib/SPVM/TestCase/File/Find.spvm
+t/test_files/lib/SPVM/File/Find.pm
+t/test_files/lib/SPVM/File/Find.spvm
+t/test_files/lib/SPVM/File/Find/Callback.pm
+t/test_files/lib/SPVM/File/Find/Callback.spvm
+t/test_files/lib/SPVM/File/Find/Info.pm
+t/test_files/lib/SPVM/File/Find/Info.spvm
