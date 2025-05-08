@@ -219,13 +219,13 @@ class File::Find {
     return $self->{follow_option};
   }
   
-  private method follow : int () {
-    return $self->full_check || $self->{follow_fast};
+  private method follow_or_follow_fast : int () {
+    return $self->{follow_option} || $self->{follow_fast};
   }
   
   private method avoid_nlink : int () {
     # a symbolic link to a directory doesn't increase the link count
-    return $self->follow || $self->{dont_use_nlink};
+    return $self->follow_or_follow_fast || $self->{dont_use_nlink};
   }
   
   private method Follow_SymLink : string ($AbsName : string) {
@@ -411,7 +411,7 @@ class File::Find {
     my $post_process      = $self->{postprocess};
     my $no_chdir          = $self->{no_chdir};
     my $full_check        = $self->full_check;
-    my $follow            = $self->follow;
+    my $follow            = $self->follow_or_follow_fast;
     my $follow_skip       = $self->{follow_skip};
     my $dangling_symlinks = $self->{dangling_symlinks};
     my $warn = $self->{warn};
