@@ -143,7 +143,7 @@ class File::Find {
     
     my $found_files_h = Hash->new;
     
-    &_find_dir($cb, $dir_slash, $follow, $found_files_h);
+    &_find_dir_old($cb, $dir_slash, $follow, $found_files_h);
   }
   
   private method contract_name : string ($cdir : string, $fn : string) {
@@ -293,7 +293,7 @@ class File::Find {
     return $AbsName;
   }
   
-  private static method _find_dir : void ($wanted : File::Find::Callback, $dir_name : string, $follow : int, $found_files_h : Hash) {
+  private static method _find_dir_old : void ($wanted : File::Find::Callback, $dir_name : string, $follow : int, $found_files_h : Hash) {
     
     my $info = File::Find::Info->new;
     
@@ -327,7 +327,7 @@ class File::Find {
       
       my $next_dir_name = "$dir_name/$file_base_name";
       if (Sys->d($next_dir_name)) {
-        &_find_dir($wanted, $next_dir_name, $follow, $found_files_h);
+        &_find_dir_old($wanted, $next_dir_name, $follow, $found_files_h);
       }
       else {
         my $info = File::Find::Info->new;
