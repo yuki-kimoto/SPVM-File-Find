@@ -471,7 +471,7 @@ class File::Find {
     }
     else { # no follow
       if ($topstat->d) {
-        $self->_find_dir_v2($wanted_callback, $top_item, $topstat->st_nlink);
+        $self->_find_dir($wanted_callback, $top_item, $topstat->st_nlink);
         $Is_Dir = 1;
       }
       else {
@@ -522,7 +522,7 @@ class File::Find {
     }
   }
   
-  method _find_dir_v2 : void ($wanted_callback : File::Find::Callback, $p_dir : string, $nlink : long) {
+  method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string, $nlink : long) {
     
     my $CdLvl = 0;
     my $Level = 0;
