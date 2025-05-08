@@ -21,11 +21,12 @@ class File::Find {
   use Hash;
   use File::Spec;
   use Cwd;
+  use IO::Dir;
   
   # Fields
   has bydepth : ro byte;
   
-  has preprocess : File::Find::Callback;
+  has preprocess : File::Find::Callback::Preprocess;
   
   has postprocess : File::Find::Callback;
   
@@ -47,6 +48,8 @@ class File::Find {
   has SLnkSeen : Hash of Int;
   
   has current_dir : string;
+  
+  has skip_pattern : string;
   
   # Class Methods
   static method new : File::Find ($options : object[] = undef) {
@@ -71,7 +74,7 @@ class File::Find {
     
     $self->{bydepth} = (byte)$options_h->get_or_default_int("bydepth", 0);
     
-    $self->{preprocess} = (File::Find::Callback)$options_h->get("preprocess");
+    $self->{preprocess} = (File::Find::Callback::Preprocess)$options_h->get("preprocess");
     
     $self->{postprocess} = (File::Find::Callback)$options_h->get("postprocess");
     
@@ -90,6 +93,8 @@ class File::Find {
     $self->{SLnkSeen} = Hash->new;
     
     $self->{current_dir} = File::Spec->curdir // ".";
+    
+    $self->{skip_pattern} = "^\.{1,2}\z";
     
     return $self;
   }
@@ -466,7 +471,7 @@ class File::Find {
     }
     else { # no follow
       if ($topstat->d) {
-        # $self->_find_dir_v2($wanted_callback, $top_item, $topstat->st_nlink);
+        $self->_find_dir_v2($wanted_callback, $top_item, $topstat->st_nlink);
         $Is_Dir = 1;
       }
       else {
@@ -514,6 +519,211 @@ class File::Find {
     
     unless ($no_chdir) {
       Sys->chdir($cwd);
+    }
+  }
+  
+  method _find_dir_v2 : void ($wanted_callback : File::Find::Callback, $p_dir : string, $nlink : long) {
+    
+    my $CdLvl = 0;
+    my $Level = 0;
+    my $Stack = List->new(new object[0]);
+    my $filenames_list = StringList->new;
+    my $SE = (object[])undef;
+    my $dir_name = $p_dir;
+    my $dir_rel = $self->{current_dir};
+    my $no_nlink = 0;
+    my $no_chdir = $self->{no_chdir};
+    my $bydepth = $self->{bydepth};
+    my $post_process = $self->{postprocess};
+    my $pre_process = $self->{preprocess};
+    my $avoid_nlink = $self->avoid_nlink;
+    
+    my $warn = $self->{warn};
+    
+    my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
+    
+    my $info = File::Find::Info->new;
+    
+    unless ($no_chdir || ($p_dir eq $self->{current_dir})) {
+      my $udir = $p_dir;
+      eval { Sys->chdir($udir); }
+      
+      if ($@) {
+        if ($warn) {
+          warn "Can't cd to $udir: $@";
+        }
+        return;
+      }
+    }
+    
+    # push the starting directory
+    if ($bydepth) {
+      $Stack->push([(object)$CdLvl, $p_dir, $dir_rel, -1]);
+    }
+    my $loop_started = 0;
+    while (1) {
+      if ($loop_started++) {
+        while (1) {
+          
+          unless ($Stack->length >= 0) {
+            last;
+          }
+          
+          $SE = (object[])$Stack->pop;
+          
+          $Level = $SE->[0]->(int);
+          $p_dir = $SE->[1]->(string);
+          $dir_rel = $SE->[2]->(string);
+          $nlink = $SE->[3]->(int);
+          
+          if ($CdLvl > $Level && !$no_chdir) {
+            my $tmp = Fn->join("/", (string[])Array->repeat([".."], $CdLvl - $Level));
+            Sys->chdir($tmp);
+            $CdLvl = $Level;
+          }
+          
+          $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
+          $dir_pref = "$dir_name/";
+          
+          if ($nlink == -2) {
+            $info->{name} = $p_dir;
+            $info->{dir} = $p_dir;
+            $info->{_} = $self->{current_dir};
+            $post_process->($info);              # End-of-directory processing
+          }
+          elsif ($nlink < 0) {  # must be finddepth, report dirname now
+            $info->{name} = $dir_name;
+            if (Fn->substr($info->{name}, -2) eq "/.") {
+              Fn->substr(my $_ = [$info->{name}], length($info->{name}) == 2 ? length($info->{name}) - 1 : length($info->{name}) - 2, -1, "");
+              $info->{name} = $_->[0];
+            }
+            $info->{dir} = $p_dir;
+            $info->{_} = ($no_chdir ? $dir_name : $dir_rel);
+            if (Fn->substr($info->{_}, -2) eq "/." ) {
+              Fn->substr(my $_ = [$info->{_}], length($info->{_}) == 2 ? length($info->{_}) - 1 : length($info->{_}) - 2, -1, "");
+              $info->{_} = $_->[0];
+            }
+            $wanted_callback->($info);
+           }
+           else {
+             if ($bydepth) {
+               $Stack->push([(object)$CdLvl, $p_dir, $dir_rel, -1]);
+               last;
+             }
+          }
+        }
+      }
+      
+      unless ($SE) {
+        last;
+      }
+      
+      unless ($bydepth) {
+        $info->{dir} = $p_dir;
+        $info->{name} = $dir_name;
+        $info->{_} = ($no_chdir ? $dir_name : $dir_rel );
+        $wanted_callback->($info);
+        if ($info->{prune}) {
+          next;
+        }
+      }
+      
+      # change to that directory
+      unless ($no_chdir || ($dir_rel eq $self->{current_dir})) {
+        my $udir= $dir_rel;
+        eval { Sys->chdir($udir); }
+        if ($@) {
+          if ($warn) {
+            warn "Can't cd to (" . ($p_dir ne "/" ? $p_dir : "") . "/) $udir: $@";
+          }
+          next;
+        }
+        $CdLvl++;
+      }
+      
+      $info->{dir} = $dir_name;
+      
+      # Get the list of files in the current directory.
+      my $dh = (IO::Dir)undef;
+      eval { $dh = IO::Dir->new($no_chdir ? $dir_name : $self->{current_dir}); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't opendir($dir_name): $@";
+        }
+        next;
+      }
+      while (my $dirent = $dh->read) {
+        $filenames_list->push($dirent->d_name);
+      }
+      $dh->close;
+      
+      my $filenames = $filenames_list->to_array;
+      
+      if ($pre_process) {
+        $filenames = $pre_process->($filenames);
+      }
+      if ($post_process) {
+        $Stack->push([(object)$CdLvl, $dir_name, "", -2]);
+      }
+      
+      # default: use whatever was specified
+      # (if $nlink >= 2, and $avoid_nlink == 0, this will switch back)
+      $no_nlink = $avoid_nlink;
+      # if dir has wrong nlink count, force switch to slower stat method
+      if ($nlink < 2) {
+        $no_nlink = 1;
+      }
+      
+      if ($nlink == 2 && !$no_nlink) {
+        # This dir has no subdirectories.
+        for my $FN (@$filenames) {
+          if (Re->m($FN, $self->{skip_pattern})) {
+            next;
+          }
+          $info->{name} = $dir_pref . $FN;
+          $info->{_} = ($no_chdir ? $info->{name} : $FN);
+          $wanted_callback->($info);
+        }
+      }
+      else {
+        # This dir has subdirectories.
+        my $subcount = $nlink - 2;
+        
+        # HACK: insert directories at this position, so as to preserve
+        # the user pre-processed ordering of files (thus ensuring
+        # directory traversal is in user sorted order, not at random).
+        my $stack_top = $Stack->length;
+        
+        for my $FN (@$filenames) {
+          if (Re->m($FN, $self->{skip_pattern})) {
+            next;
+          }
+          if ($subcount > 0 || $no_nlink) {
+            # Seen all the subdirs?
+            # check for directoriness.
+            # stat is faster for a file in the current directory
+            my $sub_nlink = (my $sub_lstat = Sys->lstat($no_chdir ? $dir_pref . $FN : $FN))->st_nlink;
+            
+            if ($sub_lstat->d) {
+              --$subcount;
+              # HACK: replace push to preserve dir traversal order
+              #push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
+              $Stack->splice($stack_top, 0,
+                       [(object)$CdLvl,$dir_name,$FN,$sub_nlink]);
+            }
+            else {
+              $info->{name} = $dir_pref . $FN;
+              $info->{_} = ($no_chdir ? $info->{name} : $FN);
+              $wanted_callback->($info);
+            }
+          }
+          else {
+            $info->{name} = $dir_pref . $FN;
+            $info->{_} = ($no_chdir ? $info->{name} : $FN);
+            $wanted_callback->($info);
+          }
+        }
+      }
     }
   }
   
