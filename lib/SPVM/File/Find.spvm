@@ -26,9 +26,9 @@ class File::Find {
   # Fields
   has bydepth : ro byte;
   
-  has preprocess : File::Find::Callback::Preprocess;
+  has preprocess : ro File::Find::Callback::Preprocess;
   
-  has postprocess : File::Find::Callback;
+  has postprocess : ro File::Find::Callback;
   
   has follow : ro byte;
   
@@ -65,7 +65,8 @@ class File::Find {
       "follow_skip",
       "dangling_symlinks",
       "no_chdir",
-      "dont_use_nlink"
+      "dont_use_nlink",
+      "warn",
     ];
     
     Fn->check_option_names($options, $option_names);
@@ -102,6 +103,8 @@ class File::Find {
     $self->{current_dir} = File::Spec->curdir // ".";
     
     $self->{skip_pattern} = "^\.{1,2}\z";
+    
+    $self->{warn} = (byte)$options_h->get_or_default_int("warn", 0);
     
     return $self;
   }
