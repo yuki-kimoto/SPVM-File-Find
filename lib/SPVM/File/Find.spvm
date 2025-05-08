@@ -40,6 +40,8 @@ class File::Find {
   
   has dont_use_nlink : ro byte;
   
+  has warn : ro byte;
+  
   # Undocumented Fields
   has SLnkSeen : Hash of Int;
   
@@ -206,6 +208,11 @@ class File::Find {
   
   private method follow : int () {
     return $self->full_check || $self->{follow_fast};
+  }
+  
+  private method avoid_nlink : int () {
+    # a symbolic link to a directory doesn't increase the link count
+    return $self->follow || $self->{dont_use_nlink};
   }
   
   private method Follow_SymLink : string ($AbsName : string) {
@@ -376,6 +383,146 @@ class File::Find {
     return $path;
   }
   
+  private method _find_opt : void ($wanted_callback : File::Find::Callback, $top_item : string) {
+    
+    unless ($top_item) {
+      die "invalid top directory" ;
+    }
+    
+    # This function must local()ize everything because callbacks may
+    # call find() or finddepth()
+    
+    my $cwd            = Cwd->getcwd();
+    my $bydepth           = $self->{bydepth};
+    my $pre_process       = $self->{preprocess};
+    my $post_process      = $self->{postprocess};
+    my $no_chdir          = $self->{no_chdir};
+    my $full_check        = $self->full_check;
+    my $follow            = $self->follow;
+    my $follow_skip       = $self->{follow_skip};
+    my $dangling_symlinks = $self->{dangling_symlinks};
+    my $warn = $self->{warn};
+    
+    my $abs_dir = (string)undef;
+    my $Is_Dir = (string)undef;
+    
+    my $topstat = (Sys::IO::Stat)undef;
+    if ($follow) {
+      eval { $topstat = Sys->stat($top_item); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't stat $top_item: $@";
+        }
+      }
+      return;
+    }
+    else {
+      eval { $topstat = Sys->lstat($top_item); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't lstat $top_item: $@";
+        }
+      }
+      return;
+    }
+    
+    # canonicalize directory separators
+    if (Sys::OS->is_windows) {
+      Re->s(my $_ = [$top_item], ["[/\\\\]", "g"], "/");
+      $top_item = $_->[0];
+    }
+    
+    # no trailing / unless path is root
+    unless (&_is_root($top_item)) {
+      Re->s(my $_ = [$top_item], "/\z", "");
+      $top_item = $_->[0];
+    }
+    
+    $Is_Dir= 0;
+    
+    if ($follow) {
+      if (&_is_absolute($top_item)) {
+        $abs_dir = $top_item;
+      }
+      elsif ($top_item eq $self->{current_dir}) {
+        $abs_dir = $cwd;
+      }
+      else {  # care about any  ../
+        $abs_dir = $self->contract_name("$cwd/", $top_item);
+      }
+      $abs_dir = $self->Follow_SymLink($abs_dir);
+      unless ($abs_dir) {
+        if ($dangling_symlinks) {
+          $dangling_symlinks->($top_item, $cwd);
+        }
+        return;
+      }
+      
+      if ($topstat->d) {
+        $self->_find_dir_symlnk($wanted_callback, $abs_dir, $top_item);
+        $Is_Dir= 1;
+      }
+    }
+    else { # no follow
+      if ($topstat->d) {
+        $self->_find_dir_v2($wanted_callback, $top_item, $topstat->st_nlink);
+        $Is_Dir = 1;
+      }
+      else {
+        $abs_dir = $top_item;
+      }
+    }
+    
+    unless ($Is_Dir) {
+      my $_ = File::Basename->fileparse($abs_dir);
+      my $base_name = $_->[0];
+      my $dir = $_->[1];
+      
+      unless ($dir) {
+        $dir = "./";
+        $base_name = $top_item;
+      }
+      
+      $abs_dir = $dir;
+      
+      my $success_chdir = 0;
+      eval { Sys->chdir($abs_dir); }
+      unless ($@) {
+        $success_chdir = 1;
+      }
+      
+      unless ($no_chdir || $success_chdir) {
+        if ($warn) {
+          warn "Couldn't chdir $abs_dir";
+        }
+        return;
+      }
+      
+      my $name = $abs_dir . $base_name;
+      if ($no_chdir) {
+        $base_name = $name;
+      }
+      
+      my $info = File::Find::Info->new;
+      $info->{dir} = $dir;
+      $info->{name} = $name;
+      $info->{_} = $base_name;
+      
+      $wanted_callback->($info);
+    }
+    
+    unless ($no_chdir) {
+      Sys->chdir($cwd);
+    }
+  }
+  
+  method _find_dir_v2 : void ($wanted : File::Find::Callback, $dir_loc : string, $p_dir : string) {
+    die "TODO";
+  }
+  
+  method _find_dir_symlnk : void ($wanted : File::Find::Callback, $dir_loc : string, $p_dir : string) {
+    die "TODO";
+  }
 }
 
 __END__
