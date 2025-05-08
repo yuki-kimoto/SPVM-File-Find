@@ -9,7 +9,7 @@ class TestCase::File::Find {
   static method test : int () {
     
     {
-      my $dir = "lib";
+      my $dir = "t/test_files/lib";
       
       my $files_list = StringList->new;
       
@@ -31,25 +31,26 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "lib",
-        "lib/SPVM",
-        "lib/SPVM/File",
-        "lib/SPVM/File/Find",
-        "lib/SPVM/File/Find.pm",
-        "lib/SPVM/File/Find.spvm",
-        "lib/SPVM/File/Find/Callback.pm",
-        "lib/SPVM/File/Find/Callback.spvm",
-        "lib/SPVM/File/Find/Info.pm",
-        "lib/SPVM/File/Find/Info.spvm",
+        "t/test_files/lib",
+        "t/test_files/lib/SPVM",
+        "t/test_files/lib/SPVM/File",
+        "t/test_files/lib/SPVM/File/Find",
+        "t/test_files/lib/SPVM/File/Find.pm",
+        "t/test_files/lib/SPVM/File/Find.spvm",
+        "t/test_files/lib/SPVM/File/Find/Callback.pm",
+        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
+        "t/test_files/lib/SPVM/File/Find/Info.pm",
+        "t/test_files/lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
     }
     
     {
-      my $dir = "lib";
+      my $dir = "t/test_files/lib";
       
       my $files_list = StringList->new;
       
@@ -71,25 +72,26 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "lib",
-        "lib/SPVM",
-        "lib/SPVM/File",
-        "lib/SPVM/File/Find",
-        "lib/SPVM/File/Find.pm",
-        "lib/SPVM/File/Find.spvm",
-        "lib/SPVM/File/Find/Callback.pm",
-        "lib/SPVM/File/Find/Callback.spvm",
-        "lib/SPVM/File/Find/Info.pm",
-        "lib/SPVM/File/Find/Info.spvm",
+        "t/test_files/lib",
+        "t/test_files/lib/SPVM",
+        "t/test_files/lib/SPVM/File",
+        "t/test_files/lib/SPVM/File/Find",
+        "t/test_files/lib/SPVM/File/Find.pm",
+        "t/test_files/lib/SPVM/File/Find.spvm",
+        "t/test_files/lib/SPVM/File/Find/Callback.pm",
+        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
+        "t/test_files/lib/SPVM/File/Find/Info.pm",
+        "t/test_files/lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
     }
     
     {
-      my $dir = "lib/";
+      my $dir = "t/test_files/lib/";
       
       my $files_list = StringList->new;
       
@@ -111,19 +113,20 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "lib",
-        "lib/SPVM",
-        "lib/SPVM/File",
-        "lib/SPVM/File/Find",
-        "lib/SPVM/File/Find.pm",
-        "lib/SPVM/File/Find.spvm",
-        "lib/SPVM/File/Find/Callback.pm",
-        "lib/SPVM/File/Find/Callback.spvm",
-        "lib/SPVM/File/Find/Info.pm",
-        "lib/SPVM/File/Find/Info.spvm",
+        "t/test_files/lib",
+        "t/test_files/lib/SPVM",
+        "t/test_files/lib/SPVM/File",
+        "t/test_files/lib/SPVM/File/Find",
+        "t/test_files/lib/SPVM/File/Find.pm",
+        "t/test_files/lib/SPVM/File/Find.spvm",
+        "t/test_files/lib/SPVM/File/Find/Callback.pm",
+        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
+        "t/test_files/lib/SPVM/File/Find/Info.pm",
+        "t/test_files/lib/SPVM/File/Find/Info.spvm",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
     }
@@ -131,7 +134,7 @@ class TestCase::File::Find {
     {
       my $cwd = Cwd->getcwd;
       
-      my $dir = "$cwd/lib";
+      my $dir = "$cwd/t/test_files/lib";
       
       my $files_list = StringList->new;
       
@@ -166,6 +169,7 @@ class TestCase::File::Find {
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
     }
@@ -173,7 +177,7 @@ class TestCase::File::Find {
     {
       my $cwd = Cwd->getcwd;
       
-      my $dir = "$cwd/lib/";
+      my $dir = "$cwd/t/test_files/lib/";
       
       my $files_list = StringList->new;
       
@@ -211,12 +215,13 @@ class TestCase::File::Find {
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
     }
     
     {
-      Sys::IO->chdir("lib");
+      Sys::IO->chdir("t/test_files/lib");
       my $dir = ".";
       
       my $files_list = StringList->new;
@@ -252,6 +257,7 @@ class TestCase::File::Find {
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
         return 0;
       }
       Sys::IO->chdir("..");

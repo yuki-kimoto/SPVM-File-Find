@@ -1,0 +1,28 @@
+# Copyright (c) 2025 Yuki Kimoto
+# MIT License
+
+class File::Find::Info {
+  version_from File::Find;
+  
+  allow File::Find;
+  
+  # Class Methods
+  private static method new : File::Find::Info () {
+    
+    my $self = new File::Find::Info;
+    
+    return $self;
+  }
+  
+  # Fields
+  has dir : ro string;
+  
+  has name : ro string;
+  
+  has _ : ro string;
+  
+  has fullname : ro string;
+  
+  has prune : rw byte;
+  
+}
