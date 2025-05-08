@@ -30,7 +30,7 @@ class File::Find {
   
   has postprocess : File::Find::Callback;
   
-  has follow_option : ro byte;
+  has follow : ro byte;
   
   has follow_fast : ro byte;
   
@@ -78,7 +78,7 @@ class File::Find {
     
     $self->{postprocess} = (File::Find::Callback)$options_h->get("postprocess");
     
-    $self->{follow_option} = (byte)$options_h->get_or_default_int("follow", 0);
+    $self->{follow} = (byte)$options_h->get_or_default_int("follow", 0);
     
     $self->{follow_fast} = (byte)$options_h->get_or_default_int("follow_fast", 0);
     
@@ -86,7 +86,7 @@ class File::Find {
       $self->{follow_skip} = (byte)$options_h->get_int("follow_skip");
     }
     else {
-      if ($self->{follow_option} || $self->{follow_fast}) {
+      if ($self->{follow} || $self->{follow_fast}) {
         $self->{follow_skip} = 1;
       }
     }
@@ -115,7 +115,7 @@ class File::Find {
     
     my $no_chdir = $self->{no_chdir};
     
-    my $follow = $self->{follow_option};
+    my $follow = $self->{follow};
     
     unless ($no_chdir) {
       die "TODO:no no_chdir logic.";
@@ -216,11 +216,11 @@ class File::Find {
   }
   
   private method full_check : int () {
-    return $self->{follow_option};
+    return $self->{follow};
   }
   
   private method follow_or_follow_fast : int () {
-    return $self->{follow_option} || $self->{follow_fast};
+    return $self->{follow} || $self->{follow_fast};
   }
   
   private method avoid_nlink : int () {
