@@ -399,6 +399,10 @@ class File::Find {
     return $path;
   }
   
+  method find_v2 : void ($cb : File::Find::Callback, $dir : string) {
+    $self->_find_opt($cb, $dir);
+  }
+  
   private method _find_opt : void ($wanted_callback : File::Find::Callback, $top_item : string) {
     
     unless ($top_item) {
