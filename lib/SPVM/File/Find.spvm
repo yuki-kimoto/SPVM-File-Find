@@ -82,7 +82,14 @@ class File::Find {
     
     $self->{follow_fast} = (byte)$options_h->get_or_default_int("follow_fast", 0);
     
-    $self->{follow_skip} = (byte)$options_h->get_or_default_int("follow_skip", 1);
+    if ($options_h->exists("follow_skip")) {
+      $self->{follow_skip} = (byte)$options_h->get_int("follow_skip");
+    }
+    else {
+      if ($self->{follow_option} || $self->{follow_fast}) {
+        $self->{follow_skip} = 1;
+      }
+    }
     
     $self->{dangling_symlinks} = (File::Find::Callback::DanglingSymlinks)$options_h->get("dangling_symlinks");
     
