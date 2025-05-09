@@ -167,6 +167,8 @@ Set L</"warn"> field to this value.
 
 =head1 Instance Methods
 
+=head2 find
+
 C<method find : void ($cb : L<File::Find::Callback|SPVM::File::Find::Callback>, $dir : string);>
 
 Iterates each file recursively under the $dir and calls the callback $cb by the file.
