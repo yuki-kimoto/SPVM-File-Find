@@ -540,7 +540,7 @@ class File::Find {
     my $CdLvl = 0;
     my $Level = 0;
     my $Stack = List->new;
-    my $SE = new object[4];
+    my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $no_nlink = 0;
@@ -575,17 +575,14 @@ class File::Find {
     my $loop_started = 0;
     
     while (1) {
-      if ($loop_started++) {
+      if ($loop_started) {
         while (1) {
           
           unless ($Stack->length > 0) {
-            $SE = undef;
             last;
           }
           
-          my $foo = $Stack->pop;
-          
-          $SE = (object[])$foo;
+          $SE = (object[])$Stack->pop;
           
           $Level = $SE->[0]->(int);
           $p_dir = $SE->[1]->(string);
@@ -628,10 +625,14 @@ class File::Find {
              }
           }
         }
+        
+        unless ($SE) {
+          last;
+        }
+        $SE = undef;
       }
-      
-      unless ($SE) {
-        last;
+      else {
+        $loop_started++;
       }
       
       unless ($bydepth) {
@@ -748,7 +749,7 @@ class File::Find {
     my $Stack = List->new;
     my $new_loc = (string)undef;
     my $updir_loc = $dir_loc; # untainted parent directory
-    my $SE = new object[5];
+    my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $byd_flag = 0; # flag for pending stack entry if $bydepth
@@ -787,7 +788,7 @@ class File::Find {
     my $loop_started = 0;
     while (1) {
       
-      unless ($loop_started++) {
+      if ($loop_started) {
         while (1) {
           
           unless ($Stack->length > 0) {
@@ -839,10 +840,14 @@ class File::Find {
             last;
           }
         }
+        
+        unless ($SE) {
+          last;
+        }
+        $SE = undef;
       }
-      
-      unless ($SE) {
-        last;
+      else {
+        $loop_started++;
       }
       
       unless ($bydepth) {

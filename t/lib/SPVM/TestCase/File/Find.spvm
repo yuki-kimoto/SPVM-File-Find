@@ -14,6 +14,7 @@ class TestCase::File::Find {
       my $files_list = StringList->new;
       
       File::Find->new({no_chdir => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
         my $dir = $info->dir;
         my $file_base_name = $info->name;
         
