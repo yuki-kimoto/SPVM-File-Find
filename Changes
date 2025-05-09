@@ -1,4 +1,4 @@
-0.026 2025-05-07
+0.026 2025-05-09
   [Incompatible Changes]
     * File::Find becomes a object-oriented class. new method is added.
     
