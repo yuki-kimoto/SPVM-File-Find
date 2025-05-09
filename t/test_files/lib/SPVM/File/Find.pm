@@ -51,7 +51,7 @@ Gets file names:
 
 =head2 bydepth
 
-C<has bydepth : ro byte;
+C<has bydepth : ro byte;>
 
 =head2 preprocess
 
@@ -162,6 +162,8 @@ Set L</"dont_use_nlink"> field to this value.
 C<warn : Int = 0>
 
 Set L</"warn"> field to this value.
+
+=back
 
 =head1 Instance Methods
 
