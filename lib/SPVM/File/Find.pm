@@ -6,7 +6,7 @@ our $VERSION = "0.026";
 
 =head1 Name
 
-SPVM::File::Find - Finding Files in Subdirectories
+SPVM::File::Find - Find Files in Subdirectories
 
 =head1 Description
 
@@ -20,7 +20,7 @@ Many tests are not written yet. This class has many bugs.
 
   use File::Find;
   
-  my $dir = "lib";
+  my $top_dir = "lib";
   
   File::Find->new->find(method : void ($info : File::Find::Info) {
     
@@ -35,7 +35,7 @@ Gets file names:
   use File::Find;
   use StringList;
   
-  my $dir = "lib";
+  my $top_dir = "lib";
   
   my $files_list = StringList->new;
   
@@ -53,41 +53,75 @@ Gets file names:
 
 C<has bydepth : ro byte;>
 
+If this filed is a true value, L</"find"> method reports the name of a directory only AFTER all its entries have been reported.
+
+See L<File::Find/"bydepth"> option for details.
+
 =head2 preprocess
 
 C<has preprocess : ro L<File::Find::Callback::Preprocess|SPVM::File::Find::Callback::Preprocess>;>
+
+This callback is used to preprocess the current directory.
+
+See L<File::Find/"preprocess"> option for details.
 
 =head2 postprocess
 
 C<has postprocess : ro L<File::Find::Callback|SPVM::File::Find::Callback>;>
 
+This callback is invoked just before leaving the currently processed directory. 
+
+See L<File::Find/"postprocess"> option for details.
+
 =head2 follow
 
 C<has follow : ro byte;>
+
+Causes symbolic links to be followed.
+
+See L<File::Find/"follow"> option for details.
 
 =head2 follow_fast
 
 C<has follow_fast : ro byte;>
 
+This is similar to follow except that it may report some files more than once.
+
+See L<File::Find/"follow_fast"> option for details.
+
 =head2 follow_skip
 
 C<has follow_skip : ro byte;>
+
+See L<File::Find/"follow_skip"> option for details.
 
 =head2 dangling_symlinks
 
 C<has dangling_symlinks : ro L<File::Find::Callback::DanglingSymlinks|SPVM::File::Find::Callback::DanglingSymlinks>;>
 
+Specifies what to do with symbolic links whose target doesn't exist.
+
+See L<File::Find/"dangling_symlinks"> option for details.
+
 =head2 no_chdir
 
 C<has no_chdir : ro byte;>
+
+Does not C<chdir()> to each directory as it recurses.
+
+See L<File::Find/"no_chdir"> option for details.
 
 =head2 dont_use_nlink
 
 C<has dont_use_nlink : ro byte;>
 
+See L<File::Find/"$dont_use_nlink"> option for details.
+
 =head2 warn
 
 C<has warn : ro byte;>
+
+If the value of this field is a true value and a system call such as C<chdir> fails, prints a warning message to stderr.
 
 =head1 Class Methods
 
@@ -172,6 +206,22 @@ Set L</"warn"> field to this value.
 C<method find : void ($cb : L<File::Find::Callback|SPVM::File::Find::Callback>, $dir : string);>
 
 Iterates each file recursively under the $dir and calls the callback $cb by the file.
+
+=head1 See Also
+
+=over 2
+
+=item * L<Sys|SPVM::Sys>
+
+=item * L<IO|SPVM::IO>
+
+=item * L<File::Basename|SPVM::File::Basename>
+
+=item * L<File::Copy|SPVM::File::Copy>
+
+=item * L<File::Spec|SPVM::File::Spec>
+
+=back
 
 =head1 Porting
 
