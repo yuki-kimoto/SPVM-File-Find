@@ -433,8 +433,8 @@ class File::Find {
         if ($warn) {
           warn "Can't stat $top_item: $@";
         }
+        return;
       }
-      return;
     }
     else {
       eval { $topstat = Sys->lstat($top_item); }
@@ -442,8 +442,8 @@ class File::Find {
         if ($warn) {
           warn "Can't lstat $top_item: $@";
         }
+        return;
       }
-      return;
     }
     
     # canonicalize directory separators
@@ -484,6 +484,7 @@ class File::Find {
       }
     }
     else { # no follow
+    
       if ($topstat->d) {
         $self->_find_dir($wanted_callback, $top_item, $topstat->st_nlink);
         $Is_Dir = 1;
@@ -510,14 +511,12 @@ class File::Find {
       unless ($@) {
         $success_chdir = 1;
       }
-      
       unless ($no_chdir || $success_chdir) {
         if ($warn) {
           warn "Couldn't chdir $abs_dir";
         }
         return;
       }
-      
       my $name = $abs_dir . $base_name;
       if ($no_chdir) {
         $base_name = $name;
@@ -540,9 +539,8 @@ class File::Find {
     
     my $CdLvl = 0;
     my $Level = 0;
-    my $Stack = List->new(new object[0]);
-    my $filenames_list = StringList->new;
-    my $SE = (object[])undef;
+    my $Stack = List->new;
+    my $SE = new object[4];
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $no_nlink = 0;
@@ -575,20 +573,24 @@ class File::Find {
       $Stack->push([(object)$CdLvl, $p_dir, $dir_rel, -1]);
     }
     my $loop_started = 0;
+    
     while (1) {
       if ($loop_started++) {
         while (1) {
           
-          unless ($Stack->length >= 0) {
+          unless ($Stack->length > 0) {
+            $SE = undef;
             last;
           }
           
-          $SE = (object[])$Stack->pop;
+          my $foo = $Stack->pop;
+          
+          $SE = (object[])$foo;
           
           $Level = $SE->[0]->(int);
           $p_dir = $SE->[1]->(string);
           $dir_rel = $SE->[2]->(string);
-          $nlink = $SE->[3]->(int);
+          $nlink = $SE->[3]->(long);
           
           if ($CdLvl > $Level && !$no_chdir) {
             my $tmp = Fn->join("/", (string[])Array->repeat([".."], $CdLvl - $Level));
@@ -666,6 +668,7 @@ class File::Find {
         }
         next;
       }
+      my $filenames_list = StringList->new;
       while (my $dirent = $dh->read) {
         $filenames_list->push($dirent->d_name);
       }
@@ -723,7 +726,7 @@ class File::Find {
               # HACK: replace push to preserve dir traversal order
               #push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
               $Stack->splice($stack_top, 0,
-                       [(object)$CdLvl,$dir_name,$FN,$sub_nlink]);
+                       [(object)[(object)$CdLvl, $dir_name, $FN, $sub_nlink]]);
             }
             else {
               $info->{name} = $dir_pref . $FN;
@@ -742,11 +745,10 @@ class File::Find {
   }
   
   method _find_dir_symlnk : void ($wanted_callback : File::Find::Callback, $dir_loc : string, $p_dir : string) {
-    my $Stack = List->new(new object[0]);
-    my $filenames_list = StringList->new;
+    my $Stack = List->new;
     my $new_loc = (string)undef;
     my $updir_loc = $dir_loc; # untainted parent directory
-    my $SE = (object[])undef;
+    my $SE = new object[5];
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $byd_flag = 0; # flag for pending stack entry if $bydepth
@@ -789,6 +791,7 @@ class File::Find {
         while (1) {
           
           unless ($Stack->length > 0) {
+            $SE = undef;
             last;
           }
           
@@ -890,6 +893,7 @@ class File::Find {
         }
         next;
       }
+      my $filenames_list = StringList->new;
       while (my $dirent = $dh->read) {
         $filenames_list->push($dirent->d_name);
       }
