@@ -13,17 +13,15 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->new({no_chdir => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+      File::Find->new({no_chdir => 1})->find_v2([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
         my $dir = $info->dir;
-        my $file_base_name = $info->name;
         
-        my $file = $dir;
-        if ($file_base_name) {
-          $file .= "/$file_base_name";
-        }
+        my $name = $info->name;
         
-        $self->{files_list}->push($file);
+        my $cur_name = $info->_;
+        
+        $self->{files_list}->push($name);
         
       }, $dir);
       
