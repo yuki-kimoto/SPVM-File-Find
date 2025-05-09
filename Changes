@@ -23,7 +23,8 @@
     * Add many options to new method.
   [Internal Changes]
     * find method is completly rewritten as same as possible to Perl's File::Find.
-    
+  [Requirement Changes]
+    * Require SPVM::IO 0.236.
 0.025 2025-05-07
   [Internal Changes]
     * Do not use File::Spec#file_name_is_root method.
