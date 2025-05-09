@@ -64,6 +64,14 @@ If this value is a true value, prunes the tree.
 
 See C<$File::Find::prune> in L<File::Find wanted function|File::Find/"wanted"> for details.
 
+=head1 See Also
+
+=over 2
+
+=item * L<File::Find|SPVM::File::Find>
+
+=back 
+
 =head1 Copyright & License
 
 Copyright (c) 2025 Yuki Kimoto
