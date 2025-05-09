@@ -5,6 +5,6 @@ class File::Find::Callback::DanglingSymlinks : interface_t {
   version_from File::Find;
   
   # Interface Methods
-  required method : void ($top_item : string, $cwd : string);
+  required method : void ($name : string, $dir : string);
   
 }

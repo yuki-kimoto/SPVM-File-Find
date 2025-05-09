@@ -6,31 +6,33 @@ package SPVM::File::Find::Callback::DanglingSymlinks;
 
 =head1 Name
 
-SPVM::File::Find::Callback::DanglingSymlinks - Short Description
+SPVM::File::Find::Callback::DanglingSymlinks - Callback for dangling_symlinks Option
 
 =head1 Description
 
-File::Find::Callback::DanglingSymlinks interface in L<SPVM> has interface methods to do someting.
+File::Find::Callback::DanglingSymlinks interface in L<SPVM> has an interface method for the callback method for C<dangling_symlinks> option.
 
 =head1 Usage
 
-  interface File::Find::Callback::DanglingSymlinks;
-
-=head1 Details
-
-
-
+  File::Find->new({
+    dangling_symlinks => method : void ($name : string, $dir : string) {
+      
+    }
+  });
+  
 =head1 Interface Methods
 
-C<required method : void ($top_item : string, $cwd : string);>
+C<required method : void ($name : string, $dir : string);>
 
-=head1 Repository
+An interface method for the callback method for C<dangling_symlinks> option.
 
+=head1 See Also
 
+=over 2
 
-=head1 Author
+=item * L<File::Find|SPVM::File::Find>
 
-Yuki Kimoto C<kimoto.yuki@gmail.com>
+=back 
 
 =head1 Copyright & License
 
