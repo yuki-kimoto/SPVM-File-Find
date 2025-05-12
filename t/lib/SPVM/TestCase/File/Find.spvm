@@ -95,6 +95,42 @@ class TestCase::File::Find {
       
       File::Find->new({no_chdir => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
+        my $cur_name = $info->_;
+        
+        $self->{files_list}->push($cur_name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/test_files/lib",
+        "t/test_files/lib/SPVM",
+        "t/test_files/lib/SPVM/File",
+        "t/test_files/lib/SPVM/File/Find",
+        "t/test_files/lib/SPVM/File/Find.pm",
+        "t/test_files/lib/SPVM/File/Find.spvm",
+        "t/test_files/lib/SPVM/File/Find/Callback.pm",
+        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
+        "t/test_files/lib/SPVM/File/Find/Info.pm",
+        "t/test_files/lib/SPVM/File/Find/Info.spvm",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
+      my $dir = "t/test_files/lib";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({no_chdir => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
         my $dir = $info->dir;
         
         my $name = $info->name;
