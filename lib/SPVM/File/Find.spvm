@@ -596,7 +596,6 @@ class File::Find {
     my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
-    my $byd_flag = 0; # flag for pending stack entry if $bydepth
     my $warn = $self->{warn};
     my $no_chdir = $self->{no_chdir};
     my $post_process = $self->{postprocess};
@@ -640,41 +639,11 @@ class File::Find {
           $dir_loc = $SE->[0]->(string);
           $updir_loc = $SE->[1]->(string);
           $p_dir = $SE->[2]->(string);
-          $byd_flag = $SE->[3]->(int);
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
           $dir_pref = "$dir_name/";
           $loc_pref = "$dir_loc/";
-          if ($byd_flag < 0) {  # must be finddepth, report dirname now
-            unless ($no_chdir || ($dir_rel eq $self->{current_dir})) {
-              eval { Sys->chdir($updir_loc); }
-              if ($@) { # $updir_loc (parent dir) is always untainted
-                if ($warn) {
-                  warn "Can't cd to $updir_loc: $@";
-                }
-                next;
-              }
-            }
-            $info->{fullname} = $dir_loc;
-            $info->{name} = $dir_name;
-            if (Fn->substr($info->{name}, length($info->{name}) - 2) eq "/." ) {
-              Fn->substr(my $_ = [$info->{name}], length($info->{name}) == 2 ? length($info->{name}) - 1 : length($info->{name}) - 2, -1, "");
-              $info->{name} = $_->[0];
-            }
-            $info->{dir} = $p_dir;
-            $info->{_} = ($no_chdir ? $dir_name : $dir_rel);
-            if (Fn->substr($info->{_}, length($info->{_}) - 2) eq "/." ) {
-              Fn->substr(my $_ = [$info->{_}], length($info->{_}) == 2 ? length($info->{_}) - 1 : length($info->{_}) - 2, -1, "");
-              $info->{_} = $_->[0];
-            }
-            
-            $lstat = Sys->lstat($info->{_}); # make sure file tests with '_' work
-            
-            $wanted_callback->($info);
-          }
-          else {
-            last;
-          }
+          last;
         }
         
         unless ($SE) {
