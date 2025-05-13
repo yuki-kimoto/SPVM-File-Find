@@ -122,23 +122,9 @@ class File::Find {
     my $is_dir = 0;
     my $abs_dir = (string)undef;
     if ($follow_or_follow_fast) {
-      my $cwd = Cwd->getcwd();
-      if (&_is_absolute($top_dir)) {
-        $abs_dir = $top_dir;
-      }
-      elsif ($top_dir eq $self->{current_dir}) {
-        $abs_dir = $cwd;
-      }
-      else {  # care about any  ../
-        $abs_dir = $self->_contract_name("$cwd/", $top_dir);
-      }
-      $abs_dir = $self->Follow_SymLink($abs_dir);
-      
-      if ($abs_dir) {
-        if ($topstat->d) {
-          $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
-          $is_dir= 1;
-        }
+      if ($topstat->d) {
+        $self->_find_dir_symlnk($cb, $top_dir);
+        $is_dir= 1;
       }
     }
     else { # no follow
@@ -238,7 +224,20 @@ class File::Find {
     }
   }
   
-  method _find_dir_symlnk : void ($cb : File::Find::Callback, $fullname : string, $top_dir : string) {
+  method _find_dir_symlnk : void ($cb : File::Find::Callback, $top_dir : string) {
+    
+    my $cwd = Cwd->getcwd();
+    my $fullname = (string)undef;
+    if (&_is_absolute($top_dir)) {
+      $fullname = $top_dir;
+    }
+    elsif ($top_dir eq $self->{current_dir}) {
+      $fullname = $cwd;
+    }
+    else {  # care about any  ../
+      $fullname = $self->_contract_name("$cwd/", $top_dir);
+    }
+    $fullname = $self->Follow_SymLink($fullname);
     
     my $parent_dir = $top_dir;
     
