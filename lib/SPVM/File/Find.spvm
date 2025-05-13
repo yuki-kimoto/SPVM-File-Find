@@ -256,8 +256,7 @@ class File::Find {
     # call find() or finddepth()
     
     my $cwd            = Cwd->getcwd();
-    my $pre_process       = $self->{preprocess};
-    my $post_process      = $self->{postprocess};
+    my $preprocess       = $self->{preprocess};
     my $no_chdir          = $self->{no_chdir};
     my $full_check        = $self->full_check;
     my $follow            = $self->follow_or_follow_fast;
@@ -386,8 +385,8 @@ class File::Find {
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $no_chdir = $self->{no_chdir};
-    my $post_process = $self->{postprocess};
-    my $pre_process = $self->{preprocess};
+    my $postprocess = $self->{postprocess};
+    my $preprocess = $self->{preprocess};
     
     my $warn = $self->{warn};
     
@@ -437,7 +436,7 @@ class File::Find {
             $info->{name} = $p_dir;
             $info->{dir} = $p_dir;
             $info->{_} = $self->{current_dir};
-            $post_process->($info);              # End-of-directory processing
+            $postprocess->($info);              # End-of-directory processing
           }
           elsif ($nlink < 0) {  # must be finddepth, report dirname now
             $info->{name} = $dir_name;
@@ -509,10 +508,10 @@ class File::Find {
       
       my $filenames = $filenames_list->to_array;
       
-      if ($pre_process) {
-        $filenames = $pre_process->($filenames);
+      if ($preprocess) {
+        $filenames = $preprocess->($filenames);
       }
-      if ($post_process) {
+      if ($postprocess) {
         $Stack->push([(object)$CdLvl, $dir_name, "", -2]);
       }
       
@@ -559,8 +558,7 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
     my $no_chdir = $self->{no_chdir};
-    my $post_process = $self->{postprocess};
-    my $pre_process = $self->{preprocess};
+    my $postprocess = $self->{postprocess};
     my $dangling_symlinks = $self->{dangling_symlinks};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
