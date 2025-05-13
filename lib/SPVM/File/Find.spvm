@@ -203,6 +203,7 @@ class File::Find {
       
       $info->{dir} = $parent_dir;
       $info->{name} = $dir;
+      $info->{fullname} = $fullname;
       $cb->($info);
       if ($info->{prune}) {
         next;
