@@ -238,7 +238,10 @@ class File::Find {
     }
   }
   
-  method _find_dir_symlnk : void ($cb : File::Find::Callback, $fullname : string, $parent_dir : string) {
+  method _find_dir_symlnk : void ($cb : File::Find::Callback, $fullname : string, $top_dir : string) {
+    
+    my $parent_dir = $top_dir;
+    
     my $dirs_stack = List->new;
     my $new_fullname = (string)undef;
     my $SE = (object[])undef;
