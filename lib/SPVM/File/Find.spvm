@@ -178,148 +178,6 @@ class File::Find {
     
   }
   
-  private method contract_name : string ($cdir : string, $fn : string) {
-    
-    if ($fn eq $self->{current_dir}) {
-      return Fn->substr($cdir, 0, Fn->rindex($cdir, "/"));
-    }
-    
-    $cdir = Fn->substr($cdir, 0, Fn->rindex($cdir, "/") + 1);
-    
-    Re->s(my $_ = [$fn], "^\./", "");
-    $fn = $_->[0];
-    
-    my $abs_name = $cdir . $fn;
-    
-    if (Fn->substr($fn, 0, 3) eq "../") {
-      while (1) {
-        my $rep = Re->s(my $_ = [$abs_name], "/[^/]*/\.\./+", "/");
-        $abs_name = $_->[0];
-        unless ($rep) {
-          last;
-        }
-      }
-    }
-    
-    return $abs_name;
-  }
-
-  private static method _is_absolute : int ($path : string) {
-    if (Sys::OS->is_windows) {
-      return !!Re->m($path, "^(?:[A-Za-z]:)?/");
-    }
-    return length $path && $path->[0] == '/';
-  }
-  
-  private static method _is_root : int ($path : string) {
-    if (Sys::OS->is_windows) {
-      return !!Re->m($path, "^(?:[A-Za-z]:)?/\z");
-    }
-    return $path eq "/";
-  }
-  
-  private method PathCombine : string ($Base : string, $Name : string) {
-    my $AbsName : string;
-    
-    if (&_is_absolute($Name)) {
-      $AbsName= $Name;
-    }
-    else {
-      $AbsName= $self->contract_name($Base, $Name);
-    }
-    
-    # (simple) check for recursion
-    my $newlen= length($AbsName);
-    if ($newlen <= length($Base)) {
-      if (($newlen == length($Base) || Fn->substr($Base, $newlen, 1) eq "/")
-          && $AbsName eq Fn->substr($Base, 0, $newlen))
-      {
-        return undef;
-      }
-    }
-    return $AbsName;
-  }
-  
-  private method full_check : int () {
-    return $self->{follow};
-  }
-  
-  private method follow_or_follow_fast : int () {
-    return $self->{follow} || $self->{follow_fast};
-  }
-  
-  private method Follow_SymLink : string ($AbsName : string) {
-    
-    my $NewName = (string)undef;
-    
-    my $lstat = Sys->lstat($AbsName);
-    my $DEV = $lstat->st_dev;
-    my $INO = $lstat->st_ino;
-    
-    my $SLnkSeen = $self->{SLnkSeen};
-    
-    my $follow_skip = $self->{follow_skip};
-    
-    my $dangling_symbolic_link = 0;
-    while ($lstat->l) {
-      
-      my $dev_ino_count = $SLnkSeen->get_int("$DEV\034$INO");
-      
-      if ($dev_ino_count) {
-        if ($follow_skip < 2) {
-          die "$AbsName is encountered a second time";
-        }
-        else {
-          return undef;
-        }
-      }
-      $dev_ino_count++;
-      $SLnkSeen->set("$DEV\034$INO", $dev_ino_count);
-      
-      my $Link = Sys->readlink($AbsName);
-      # canonicalize directory separators
-      if (Sys::OS->is_windows) {
-        Re->s(my $_ = [$Link], ["\\", "g"], "/");
-        $Link = $_->[0];
-      }
-      $NewName= $self->PathCombine($AbsName, $Link);
-      unless ($NewName) {
-        if ($follow_skip < 2) {
-          die "$AbsName is a recursive symbolic link";
-        }
-        else {
-          return undef;
-        }
-      }
-      else {
-        $AbsName= $NewName;
-      }
-      
-      $lstat = Sys->lstat($AbsName);
-      $DEV = $lstat->st_dev;
-      $INO = $lstat->st_ino;
-      
-      #  dangling symbolic link
-      eval { Sys->stat($AbsName); }
-      if ($@) {
-        $dangling_symbolic_link = 1;
-        return undef;
-      }
-    }
-    
-    my $full_check = $self->full_check;
-    if ($full_check && !$dangling_symbolic_link && (my $_ = $SLnkSeen->get_int("$DEV\034$INO"), $SLnkSeen->set("$DEV\034$INO", $_ + 1), $_)) {
-      if ( ($follow_skip < 1) || (($lstat->d) && ($follow_skip < 2)) ) {
-        die "$AbsName encountered a second time";
-      }
-      else {
-        return undef;
-      }
-    }
-    
-    return $AbsName;
-  }
-  
   method _find_dir : void ($cb : File::Find::Callback, $parent_dir : string) {
     
     my $dir = $parent_dir;
@@ -508,4 +366,147 @@ class File::Find {
       }
     }
   }
+  
+  private method contract_name : string ($cdir : string, $fn : string) {
+    
+    if ($fn eq $self->{current_dir}) {
+      return Fn->substr($cdir, 0, Fn->rindex($cdir, "/"));
+    }
+    
+    $cdir = Fn->substr($cdir, 0, Fn->rindex($cdir, "/") + 1);
+    
+    Re->s(my $_ = [$fn], "^\./", "");
+    $fn = $_->[0];
+    
+    my $abs_name = $cdir . $fn;
+    
+    if (Fn->substr($fn, 0, 3) eq "../") {
+      while (1) {
+        my $rep = Re->s(my $_ = [$abs_name], "/[^/]*/\.\./+", "/");
+        $abs_name = $_->[0];
+        unless ($rep) {
+          last;
+        }
+      }
+    }
+    
+    return $abs_name;
+  }
+
+  private static method _is_absolute : int ($path : string) {
+    if (Sys::OS->is_windows) {
+      return !!Re->m($path, "^(?:[A-Za-z]:)?/");
+    }
+    return length $path && $path->[0] == '/';
+  }
+  
+  private static method _is_root : int ($path : string) {
+    if (Sys::OS->is_windows) {
+      return !!Re->m($path, "^(?:[A-Za-z]:)?/\z");
+    }
+    return $path eq "/";
+  }
+  
+  private method PathCombine : string ($Base : string, $Name : string) {
+    my $AbsName : string;
+    
+    if (&_is_absolute($Name)) {
+      $AbsName= $Name;
+    }
+    else {
+      $AbsName= $self->contract_name($Base, $Name);
+    }
+    
+    # (simple) check for recursion
+    my $newlen= length($AbsName);
+    if ($newlen <= length($Base)) {
+      if (($newlen == length($Base) || Fn->substr($Base, $newlen, 1) eq "/")
+          && $AbsName eq Fn->substr($Base, 0, $newlen))
+      {
+        return undef;
+      }
+    }
+    return $AbsName;
+  }
+  
+  private method full_check : int () {
+    return $self->{follow};
+  }
+  
+  private method follow_or_follow_fast : int () {
+    return $self->{follow} || $self->{follow_fast};
+  }
+  
+  private method Follow_SymLink : string ($AbsName : string) {
+    
+    my $NewName = (string)undef;
+    
+    my $lstat = Sys->lstat($AbsName);
+    my $DEV = $lstat->st_dev;
+    my $INO = $lstat->st_ino;
+    
+    my $SLnkSeen = $self->{SLnkSeen};
+    
+    my $follow_skip = $self->{follow_skip};
+    
+    my $dangling_symbolic_link = 0;
+    while ($lstat->l) {
+      
+      my $dev_ino_count = $SLnkSeen->get_int("$DEV\034$INO");
+      
+      if ($dev_ino_count) {
+        if ($follow_skip < 2) {
+          die "$AbsName is encountered a second time";
+        }
+        else {
+          return undef;
+        }
+      }
+      $dev_ino_count++;
+      $SLnkSeen->set("$DEV\034$INO", $dev_ino_count);
+      
+      my $Link = Sys->readlink($AbsName);
+      # canonicalize directory separators
+      if (Sys::OS->is_windows) {
+        Re->s(my $_ = [$Link], ["\\", "g"], "/");
+        $Link = $_->[0];
+      }
+      $NewName= $self->PathCombine($AbsName, $Link);
+      unless ($NewName) {
+        if ($follow_skip < 2) {
+          die "$AbsName is a recursive symbolic link";
+        }
+        else {
+          return undef;
+        }
+      }
+      else {
+        $AbsName= $NewName;
+      }
+      
+      $lstat = Sys->lstat($AbsName);
+      $DEV = $lstat->st_dev;
+      $INO = $lstat->st_ino;
+      
+      #  dangling symbolic link
+      eval { Sys->stat($AbsName); }
+      if ($@) {
+        $dangling_symbolic_link = 1;
+        return undef;
+      }
+    }
+    
+    my $full_check = $self->full_check;
+    if ($full_check && !$dangling_symbolic_link && (my $_ = $SLnkSeen->get_int("$DEV\034$INO"), $SLnkSeen->set("$DEV\034$INO", $_ + 1), $_)) {
+      if ( ($follow_skip < 1) || (($lstat->d) && ($follow_skip < 2)) ) {
+        die "$AbsName encountered a second time";
+      }
+      else {
+        return undef;
+      }
+    }
+    
+    return $AbsName;
+  }
+  
 }
