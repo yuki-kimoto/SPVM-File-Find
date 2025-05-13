@@ -24,8 +24,6 @@ class File::Find {
   use IO::Dir;
   
   # Fields
-  has postprocess : ro File::Find::Callback;
-  
   has follow : ro byte;
   
   has follow_fast : ro byte;
@@ -51,7 +49,6 @@ class File::Find {
     my $self = new File::Find;
     
     my $option_names = [
-      "postprocess",
       "follow",
       "follow_fast",
       "follow_skip",
@@ -63,8 +60,6 @@ class File::Find {
     Fn->check_option_names($options, $option_names);
     
     my $options_h = Hash->new($options);
-    
-    $self->{postprocess} = (File::Find::Callback)$options_h->get("postprocess");
     
     $self->{follow} = (byte)$options_h->get_or_default_int("follow", 0);
     
@@ -379,7 +374,6 @@ class File::Find {
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $no_chdir = $self->{no_chdir};
-    my $postprocess = $self->{postprocess};
     
     my $warn = $self->{warn};
     
@@ -429,7 +423,6 @@ class File::Find {
             $info->{name} = $p_dir;
             $info->{dir} = $p_dir;
             $info->{_} = $self->{current_dir};
-            $postprocess->($info);              # End-of-directory processing
           }
           elsif ($nlink < 0) {  # must be finddepth, report dirname now
             $info->{name} = $dir_name;
@@ -500,10 +493,6 @@ class File::Find {
       $dh->close;
       
       my $filenames = $filenames_list->to_array;
-      
-      if ($postprocess) {
-        $Stack->push([(object)$CdLvl, $dir_name, "", -2]);
-      }
       
       my $no_nlink = 1;
       

@@ -3,6 +3,7 @@
     * Remove bydepth option.
     * Remove dont_use_nlink option.
     * Remove preprocess option.
+    * Remove postprocess option.
     
 0.027 2025-05-10
   [Document Improvement]

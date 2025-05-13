@@ -49,14 +49,6 @@ Gets file names:
 
 =head1 Fields
 
-=head2 postprocess
-
-C<has postprocess : ro L<File::Find::Callback|SPVM::File::Find::Callback>;>
-
-This callback is invoked just before leaving the currently processed directory. 
-
-See L<File::Find/"postprocess"> option for details.
-
 =head2 follow
 
 C<has follow : ro byte;>
@@ -112,12 +104,6 @@ Creates a new File::Find object given the options $options, and returns the new 
 Options:
 
 =over 2
-
-=item * postprocess
-
-C<postprocess : L<File::Find::Callback|SPVM::File::Find::Callback> = undef>
-
-See L</"postprocess"> field for details.
 
 =item * follow
 
