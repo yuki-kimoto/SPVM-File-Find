@@ -335,7 +335,6 @@ class File::Find {
     my $dirs_stack = List->new;
     my $dir = $parent_dir;
     my $dir_rel = $self->{current_dir};
-    
     my $warn = $self->{warn};
     
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
@@ -398,13 +397,15 @@ class File::Find {
           next;
         }
         
-        my $sub_lstat = Sys->lstat($dir_with_slash . $file_name);
+        my $info_name = $dir_with_slash . $file_name;
+        
+        my $sub_lstat = Sys->lstat($info_name);
         
         if ($sub_lstat->d) {
           $dirs_stack->push([(object)$dir, $file_name]);
         }
         else {
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{name} = $info_name;
           $wanted_callback->($info);
         }
       }
