@@ -106,7 +106,6 @@ class File::Find {
     my $follow = $self->{follow};
     
     my $dir = $top_dir;
-    
     my $dir_with_slash = &_is_root($dir) ? $dir : "$dir/";
     
     my $cwd = Cwd->getcwd();
@@ -187,7 +186,7 @@ class File::Find {
           next;
         }
         
-        my $info_name = $dir_with_slash . $base_name;
+        my $name = $dir_with_slash . $base_name;
         
         # follow symbolic links / do an lstat
         if ($follow_or_follow_fast) {
@@ -203,10 +202,10 @@ class File::Find {
         }
         
         my $lstat = (Sys::IO::Stat)undef;
-        eval { $lstat = Sys->lstat($info_name); }
+        eval { $lstat = Sys->lstat($name); }
         if ($@) {
           if ($warn) {
-            warn "Can't lstat($info_name): $@";
+            warn "Can't lstat($name): $@";
           }
           next;
         }
@@ -216,7 +215,7 @@ class File::Find {
         }
         else {
           $info->{fullname} = $new_fullname;
-          $info->{name} = $info_name;
+          $info->{name} = $name;
           $cb->($info);
         }
       }
