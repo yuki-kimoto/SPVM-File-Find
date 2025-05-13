@@ -333,7 +333,6 @@ class File::Find {
   method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string) {
     
     my $Stack = List->new;
-    my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     
@@ -347,11 +346,8 @@ class File::Find {
     
     while (1) {
       if ($loop_started) {
-        while (1) {
-          
-          unless ($Stack->length > 0) {
-            last;
-          }
+        my $SE = (object[])undef;
+        if ($Stack->length > 0) {
           
           $SE = (object[])$Stack->pop;
           
@@ -360,14 +356,10 @@ class File::Find {
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
           $dir_pref = "$dir_name/";
-          
+        }
+        else {
           last;
         }
-        
-        unless ($SE) {
-          last;
-        }
-        $SE = undef;
       }
       else {
         $loop_started++;
