@@ -100,7 +100,6 @@ class File::Find {
     my $warn = $self->{warn};
     
     my $abs_dir = (string)undef;
-    my $is_dir = (string)undef;
     
     my $topstat = (Sys::IO::Stat)undef;
     if ($follow) {
@@ -122,8 +121,7 @@ class File::Find {
       }
     }
     
-    $is_dir= 0;
-    
+    my $is_dir = 0;
     if ($follow) {
       my $cwd = Cwd->getcwd();
       if (&_is_absolute($top_dir)) {
@@ -156,24 +154,7 @@ class File::Find {
     }
     
     unless ($is_dir) {
-      my $_ = File::Basename->fileparse($abs_dir);
-      my $base_name = $_->[0];
-      my $dir = $_->[1];
-      
-      unless ($dir) {
-        $dir = "./";
-        $base_name = $top_dir;
-      }
-      
-      $abs_dir = $dir;
-      
-      my $name = $abs_dir . $base_name;
-      
-      my $info = File::Find::Info->new;
-      $info->{dir} = $dir;
-      $info->{name} = $name;
-      
-      $cb->($info);
+      die "The top directory \$top_dir must be a directory.";
     }
     
   }
