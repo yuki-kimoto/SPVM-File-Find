@@ -156,6 +156,7 @@ class File::Find {
     
     my $cwd = Cwd->getcwd();
     my $fullname = (string)undef;
+    my $fullname_with_slash = (string)undef;
     if ($follow_or_follow_fast) {
       if (&_is_absolute($top_dir)) {
         $fullname = $top_dir;
@@ -167,7 +168,9 @@ class File::Find {
         $fullname = $self->_contract_name("$cwd/", $top_dir);
       }
       $fullname = $self->Follow_SymLink($fullname);
+      $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
     }
+    
     
     my $dirs_stack = List->new;
     my $loop_started = 0;
@@ -186,6 +189,9 @@ class File::Find {
           
           $dir = &_is_root($parent_dir) ? "$parent_dir$base_name" : "$parent_dir/$base_name";
           $dir_with_slash = "$dir/";
+          if ($follow_or_follow_fast) {
+            $fullname_with_slash = "$fullname/";
+          }
         }
         else {
           last;
