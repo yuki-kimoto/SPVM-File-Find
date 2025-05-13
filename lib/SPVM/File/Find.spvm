@@ -84,6 +84,11 @@ class File::Find {
       die "The top directory \$top_dir must be defined." ;
     }
     
+    my $top_dir_is_dir = 0;
+    unless (Sys->d($top_dir)) {
+      die "The top directory \$top_dir must be an accessible directory." ;
+    }
+    
     # canonicalize directory separators
     if (Sys::OS->is_windows) {
       Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
@@ -118,23 +123,6 @@ class File::Find {
         }
         return;
       }
-    }
-    
-    my $is_dir = 0;
-    my $abs_dir = (string)undef;
-    if ($follow_or_follow_fast) {
-      if ($topstat->d) {
-        $is_dir= 1;
-      }
-    }
-    else { # no follow
-      if ($topstat->d) {
-        $is_dir = 1;
-      }
-    }
-    
-    unless ($is_dir) {
-      die "The top directory \$top_dir must be a directory.";
     }
     
     my $parent_dir = $top_dir;
