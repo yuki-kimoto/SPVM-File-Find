@@ -38,8 +38,6 @@ class File::Find {
   
   has no_chdir : ro byte;
   
-  has dont_use_nlink : ro byte;
-  
   has warn : ro byte;
   
   # Undocumented Fields
@@ -62,7 +60,6 @@ class File::Find {
       "follow_skip",
       "dangling_symlinks",
       "no_chdir",
-      "dont_use_nlink",
       "warn",
     ];
     
@@ -90,8 +87,6 @@ class File::Find {
     $self->{dangling_symlinks} = (File::Find::Callback::DanglingSymlinks)$options_h->get("dangling_symlinks");
     
     $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
-    
-    $self->{dont_use_nlink} = (byte)$options_h->get_or_default_int("dont_use_nlink", 1);
     
     $self->{SLnkSeen} = Hash->new;
     
@@ -177,11 +172,6 @@ class File::Find {
   
   private method follow_or_follow_fast : int () {
     return $self->{follow} || $self->{follow_fast};
-  }
-  
-  private method avoid_nlink : int () {
-    # a symbolic link to a directory doesn't increase the link count
-    return $self->follow_or_follow_fast || $self->{dont_use_nlink};
   }
   
   private method Follow_SymLink : string ($AbsName : string) {
@@ -395,11 +385,9 @@ class File::Find {
     my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
-    my $no_nlink = 0;
     my $no_chdir = $self->{no_chdir};
     my $post_process = $self->{postprocess};
     my $pre_process = $self->{preprocess};
-    my $avoid_nlink = $self->avoid_nlink;
     
     my $warn = $self->{warn};
     
@@ -528,29 +516,9 @@ class File::Find {
         $Stack->push([(object)$CdLvl, $dir_name, "", -2]);
       }
       
-      # default: use whatever was specified
-      # (if $nlink >= 2, and $avoid_nlink == 0, this will switch back)
-      $no_nlink = $avoid_nlink;
-      # if dir has wrong nlink count, force switch to slower stat method
-      if ($nlink < 2) {
-        $no_nlink = 1;
-      }
+      my $no_nlink = 1;
       
-      if ($nlink == 2 && !$no_nlink) {
-        # This dir has no subdirectories.
-        for my $FN (@$filenames) {
-          if (Re->m($FN, $self->{skip_pattern})) {
-            next;
-          }
-          $info->{name} = $dir_pref . $FN;
-          $info->{_} = ($no_chdir ? $info->{name} : $FN);
-          $wanted_callback->($info);
-        }
-      }
-      else {
-        # This dir has subdirectories.
-        my $subcount = $nlink - 2;
-        
+      {
         # HACK: insert directories at this position, so as to preserve
         # the user pre-processed ordering of files (thus ensuring
         # directory traversal is in user sorted order, not at random).
@@ -560,24 +528,17 @@ class File::Find {
           if (Re->m($FN, $self->{skip_pattern})) {
             next;
           }
-          if ($subcount > 0 || $no_nlink) {
-            # Seen all the subdirs?
-            # check for directoriness.
-            # stat is faster for a file in the current directory
-            my $sub_nlink = (my $sub_lstat = Sys->lstat($no_chdir ? $dir_pref . $FN : $FN))->st_nlink;
-            
-            if ($sub_lstat->d) {
-              --$subcount;
-              # HACK: replace push to preserve dir traversal order
-              #push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
-              $Stack->splice($stack_top, 0,
-                       [(object)[(object)$CdLvl, $dir_name, $FN, $sub_nlink]]);
-            }
-            else {
-              $info->{name} = $dir_pref . $FN;
-              $info->{_} = ($no_chdir ? $info->{name} : $FN);
-              $wanted_callback->($info);
-            }
+          
+          # Seen all the subdirs?
+          # check for directoriness.
+          # stat is faster for a file in the current directory
+          my $sub_nlink = (my $sub_lstat = Sys->lstat($no_chdir ? $dir_pref . $FN : $FN))->st_nlink;
+          
+          if ($sub_lstat->d) {
+            # HACK: replace push to preserve dir traversal order
+            #push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
+            $Stack->splice($stack_top, 0,
+                     [(object)[(object)$CdLvl, $dir_name, $FN, $sub_nlink]]);
           }
           else {
             $info->{name} = $dir_pref . $FN;
@@ -600,7 +561,6 @@ class File::Find {
     my $no_chdir = $self->{no_chdir};
     my $post_process = $self->{postprocess};
     my $pre_process = $self->{preprocess};
-    my $avoid_nlink = $self->avoid_nlink;    
     my $dangling_symlinks = $self->{dangling_symlinks};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";

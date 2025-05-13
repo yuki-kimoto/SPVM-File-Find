@@ -103,12 +103,6 @@ Does not C<chdir()> to each directory as it recurses.
 
 See L<File::Find/"no_chdir"> option for details.
 
-=head2 dont_use_nlink
-
-C<has dont_use_nlink : ro byte;>
-
-See L<File::Find/"$dont_use_nlink"> option for details.
-
 =head2 warn
 
 C<has warn : ro byte;>
@@ -170,12 +164,6 @@ Set L</"dangling_symlinks"> field to this value.
 C<no_chdir : Int = 0>
 
 Set L</"no_chdir"> field to this value.
-
-=item * dont_use_nlink
-
-C<dont_use_nlink : Int = 0>
-
-Set L</"dont_use_nlink"> field to this value.
 
 =item * warn
 
