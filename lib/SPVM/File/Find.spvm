@@ -384,20 +384,19 @@ class File::Find {
         }
         next;
       }
-      my $file_names_list = StringList->new;
+      my $base_names_list = StringList->new;
       while (my $dirent = $dh->read) {
-        $file_names_list->push($dirent->d_name);
+        $base_names_list->push($dirent->d_name);
       }
       $dh->close;
       
-      my $file_names = $file_names_list->to_array;
-      
-      for my $file_name (@$file_names) {
-        if (Re->m($file_name, $self->{skip_pattern})) {
+      my $base_names = $base_names_list->to_array;
+      for my $base_name (@$base_names) {
+        if (Re->m($base_name, $self->{skip_pattern})) {
           next;
         }
         
-        my $info_name = $dir_with_slash . $file_name;
+        my $info_name = $dir_with_slash . $base_name;
         
         my $lstat = (Sys::IO::Stat)undef;
         eval { $lstat = Sys->lstat($info_name); }
@@ -409,7 +408,7 @@ class File::Find {
         }
         
         if ($lstat->d) {
-          $dirs_stack->push([(object)$dir, $file_name]);
+          $dirs_stack->push([(object)$dir, $base_name]);
         }
         else {
           $info->{name} = $info_name;
@@ -491,35 +490,35 @@ class File::Find {
         }
         next;
       }
-      my $file_names_list = StringList->new;
+      my $base_names_list = StringList->new;
       while (my $dirent = $dh->read) {
-        $file_names_list->push($dirent->d_name);
+        $base_names_list->push($dirent->d_name);
       }
       $dh->close;
-      my $file_names = $file_names_list->to_array;
+      my $base_names = $base_names_list->to_array;
       
-      for my $file_name (@$file_names) {
-        if (Re->m($file_name, $self->{skip_pattern})) {
+      for my $base_name (@$base_names) {
+        if (Re->m($base_name, $self->{skip_pattern})) {
           next;
         }
         
         # follow symbolic links / do an lstat
-        $new_loc = $self->Follow_SymLink($loc_pref . $file_name);
+        $new_loc = $self->Follow_SymLink($loc_pref . $base_name);
 
         # ignore if invalid symlink
         unless ($new_loc) {
-          $info->{fullname} = $loc_pref . $file_name;
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{fullname} = $loc_pref . $base_name;
+          $info->{name} = $dir_with_slash . $base_name;
           $wanted_callback->($info);
           next;
         }
         
         if ($lstat->d) {
-          $dirs_stack->push([(object)$new_loc, $updir_loc, $dir, $file_name, 1]);
+          $dirs_stack->push([(object)$new_loc, $updir_loc, $dir, $base_name, 1]);
         }
         else {
           $info->{fullname} = $new_loc;
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{name} = $dir_with_slash . $base_name;
           $wanted_callback->($info);
         }
       }
