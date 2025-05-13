@@ -182,6 +182,7 @@ class File::Find {
           
           $parent_dir = $SE->[0]->(string);
           my $base_name = $SE->[1]->(string);
+          my $fullname = $SE->[2]->(string);
           
           $dir = &_is_root($parent_dir) ? "$parent_dir$base_name" : "$parent_dir/$base_name";
           $dir_with_slash = "$dir/";
@@ -236,7 +237,7 @@ class File::Find {
         }
         
         if ($lstat->d) {
-          $dirs_stack->push([(object)$dir, $base_name]);
+          $dirs_stack->push([(object)$dir, $base_name, undef]);
         }
         else {
           $info->{name} = $info_name;
