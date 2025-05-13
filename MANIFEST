@@ -11,8 +11,6 @@ lib/SPVM/File/Find/Callback.pm
 lib/SPVM/File/Find/Callback.spvm
 lib/SPVM/File/Find/Callback/DanglingSymlinks.pm
 lib/SPVM/File/Find/Callback/DanglingSymlinks.spvm
-lib/SPVM/File/Find/Callback/Preprocess.pm
-lib/SPVM/File/Find/Callback/Preprocess.spvm
 lib/SPVM/File/Find/Info.pm
 lib/SPVM/File/Find/Info.spvm
 LICENSE

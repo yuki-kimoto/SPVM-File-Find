@@ -49,14 +49,6 @@ Gets file names:
 
 =head1 Fields
 
-=head2 preprocess
-
-C<has preprocess : ro L<File::Find::Callback::Preprocess|SPVM::File::Find::Callback::Preprocess>;>
-
-This callback is used to preprocess the current directory.
-
-See L<File::Find/"preprocess"> option for details.
-
 =head2 postprocess
 
 C<has postprocess : ro L<File::Find::Callback|SPVM::File::Find::Callback>;>
@@ -120,12 +112,6 @@ Creates a new File::Find object given the options $options, and returns the new 
 Options:
 
 =over 2
-
-=item * preprocess
-
-C<preprocess : L<File::Find::Callback::Preprocess|SPVM::File::Find::Callback::Preprocess> = undef>
-
-See L</"preprocess"> field for details.
 
 =item * postprocess
 

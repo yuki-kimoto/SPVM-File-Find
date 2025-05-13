@@ -24,8 +24,6 @@ class File::Find {
   use IO::Dir;
   
   # Fields
-  has preprocess : ro File::Find::Callback::Preprocess;
-  
   has postprocess : ro File::Find::Callback;
   
   has follow : ro byte;
@@ -53,7 +51,6 @@ class File::Find {
     my $self = new File::Find;
     
     my $option_names = [
-      "preprocess",
       "postprocess",
       "follow",
       "follow_fast",
@@ -66,8 +63,6 @@ class File::Find {
     Fn->check_option_names($options, $option_names);
     
     my $options_h = Hash->new($options);
-    
-    $self->{preprocess} = (File::Find::Callback::Preprocess)$options_h->get("preprocess");
     
     $self->{postprocess} = (File::Find::Callback)$options_h->get("postprocess");
     
@@ -256,7 +251,6 @@ class File::Find {
     # call find() or finddepth()
     
     my $cwd            = Cwd->getcwd();
-    my $preprocess       = $self->{preprocess};
     my $no_chdir          = $self->{no_chdir};
     my $full_check        = $self->full_check;
     my $follow            = $self->follow_or_follow_fast;
@@ -386,7 +380,6 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $no_chdir = $self->{no_chdir};
     my $postprocess = $self->{postprocess};
-    my $preprocess = $self->{preprocess};
     
     my $warn = $self->{warn};
     
@@ -508,9 +501,6 @@ class File::Find {
       
       my $filenames = $filenames_list->to_array;
       
-      if ($preprocess) {
-        $filenames = $preprocess->($filenames);
-      }
       if ($postprocess) {
         $Stack->push([(object)$CdLvl, $dir_name, "", -2]);
       }
