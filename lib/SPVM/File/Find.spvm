@@ -96,13 +96,11 @@ class File::Find {
       $top_dir = $_->[0];
     }
     
-    my $follow = $self->follow_or_follow_fast;
+    my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $warn = $self->{warn};
     
-    my $abs_dir = (string)undef;
-    
     my $topstat = (Sys::IO::Stat)undef;
-    if ($follow) {
+    if ($follow_or_follow_fast) {
       eval { $topstat = Sys->stat($top_dir); }
       if ($@) {
         if ($warn) {
@@ -122,7 +120,8 @@ class File::Find {
     }
     
     my $is_dir = 0;
-    if ($follow) {
+    my $abs_dir = (string)undef;
+    if ($follow_or_follow_fast) {
       my $cwd = Cwd->getcwd();
       if (&_is_absolute($top_dir)) {
         $abs_dir = $top_dir;
@@ -134,22 +133,18 @@ class File::Find {
         $abs_dir = $self->contract_name("$cwd/", $top_dir);
       }
       $abs_dir = $self->Follow_SymLink($abs_dir);
-      unless ($abs_dir) {
-        return;
-      }
       
-      if ($topstat->d) {
-        $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
-        $is_dir= 1;
+      if ($abs_dir) {
+        if ($topstat->d) {
+          $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
+          $is_dir= 1;
+        }
       }
     }
     else { # no follow
       if ($topstat->d) {
         $self->_find_dir($cb, $top_dir);
         $is_dir = 1;
-      }
-      else {
-        $abs_dir = $top_dir;
       }
     }
     
