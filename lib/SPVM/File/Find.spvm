@@ -224,7 +224,7 @@ class File::Find {
     return $AbsName;
   }
   
-  private method _find_opt : void ($wanted_callback : File::Find::Callback, $top_dir : string) {
+  private method _find_opt : void ($cb : File::Find::Callback, $top_dir : string) {
     
     unless ($top_dir) {
       die "invalid top directory" ;
@@ -292,14 +292,14 @@ class File::Find {
       }
       
       if ($topstat->d) {
-        $self->_find_dir_symlnk($wanted_callback, $abs_dir, $top_dir);
+        $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
         $Is_Dir= 1;
       }
     }
     else { # no follow
     
       if ($topstat->d) {
-        $self->_find_dir($wanted_callback, $top_dir);
+        $self->_find_dir($cb, $top_dir);
         $Is_Dir = 1;
       }
       else {
@@ -325,12 +325,12 @@ class File::Find {
       $info->{dir} = $dir;
       $info->{name} = $name;
       
-      $wanted_callback->($info);
+      $cb->($info);
     }
     
   }
   
-  method _find_dir : void ($wanted_callback : File::Find::Callback, $parent_dir : string) {
+  method _find_dir : void ($cb : File::Find::Callback, $parent_dir : string) {
     
     my $dir = $parent_dir;
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
@@ -364,7 +364,7 @@ class File::Find {
       
       $info->{dir} = $parent_dir;
       $info->{name} = $dir;
-      $wanted_callback->($info);
+      $cb->($info);
       if ($info->{prune}) {
         next;
       }
@@ -408,13 +408,13 @@ class File::Find {
         }
         else {
           $info->{name} = $info_name;
-          $wanted_callback->($info);
+          $cb->($info);
         }
       }
     }
   }
   
-  method _find_dir_symlnk : void ($wanted_callback : File::Find::Callback, $dir_loc : string, $parent_dir : string) {
+  method _find_dir_symlnk : void ($cb : File::Find::Callback, $dir_loc : string, $parent_dir : string) {
     my $dirs_stack = List->new;
     my $new_loc = (string)undef;
     my $updir_loc = $dir_loc; # untainted parent directory
@@ -468,7 +468,7 @@ class File::Find {
         $info->{fullname} = $dir_loc;
         # prune may happen here
         $info->{prune} = 0;
-        $wanted_callback->($info);
+        $cb->($info);
         if ($info->prune) {
           next;
         }
@@ -505,7 +505,7 @@ class File::Find {
         unless ($new_loc) {
           $info->{fullname} = $loc_pref . $base_name;
           $info->{name} = $dir_with_slash . $base_name;
-          $wanted_callback->($info);
+          $cb->($info);
           next;
         }
         
@@ -515,7 +515,7 @@ class File::Find {
         else {
           $info->{fullname} = $new_loc;
           $info->{name} = $dir_with_slash . $base_name;
-          $wanted_callback->($info);
+          $cb->($info);
         }
       }
     }
