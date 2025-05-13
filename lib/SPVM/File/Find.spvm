@@ -173,6 +173,7 @@ class File::Find {
     
     
     my $dirs_stack = List->new;
+    my $new_fullname = (string)undef;
     my $loop_started = 0;
     while (1) {
       my $info = File::Find::Info->new;
@@ -234,6 +235,19 @@ class File::Find {
         
         my $info_name = $dir_with_slash . $base_name;
         
+        # follow symbolic links / do an lstat
+        if ($follow_or_follow_fast) {
+          $new_fullname = $self->Follow_SymLink($fullname_with_slash . $base_name);
+          
+          # ignore if invalid symlink
+          unless ($new_fullname) {
+            $info->{fullname} = $fullname_with_slash . $base_name;
+            $info->{name} = $dir_with_slash . $base_name;
+            $cb->($info);
+            next;
+          }
+        }
+        
         my $lstat = (Sys::IO::Stat)undef;
         eval { $lstat = Sys->lstat($info_name); }
         if ($@) {
@@ -244,9 +258,10 @@ class File::Find {
         }
         
         if ($lstat->d) {
-          $dirs_stack->push([(object)$dir, $base_name, undef]);
+          $dirs_stack->push([(object)$dir, $base_name, $new_fullname]);
         }
         else {
+          $info->{fullname} = $new_fullname;
           $info->{name} = $info_name;
           $cb->($info);
         }
