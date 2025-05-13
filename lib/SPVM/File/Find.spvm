@@ -105,26 +105,6 @@ class File::Find {
     my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $follow = $self->{follow};
     
-    my $topstat = (Sys::IO::Stat)undef;
-    if ($follow_or_follow_fast) {
-      eval { $topstat = Sys->stat($top_dir); }
-      if ($@) {
-        if ($warn) {
-          warn "Can't stat $top_dir: $@";
-        }
-        return;
-      }
-    }
-    else {
-      eval { $topstat = Sys->lstat($top_dir); }
-      if ($@) {
-        if ($warn) {
-          warn "Can't lstat $top_dir: $@";
-        }
-        return;
-      }
-    }
-    
     my $parent_dir = $top_dir;
     
     my $dir = $parent_dir;
