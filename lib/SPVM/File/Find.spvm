@@ -224,9 +224,9 @@ class File::Find {
     return $AbsName;
   }
   
-  private method _find_opt : void ($wanted_callback : File::Find::Callback, $top_item : string) {
+  private method _find_opt : void ($wanted_callback : File::Find::Callback, $top_dir : string) {
     
-    unless ($top_item) {
+    unless ($top_dir) {
       die "invalid top directory" ;
     }
     
@@ -244,19 +244,19 @@ class File::Find {
     
     my $topstat = (Sys::IO::Stat)undef;
     if ($follow) {
-      eval { $topstat = Sys->stat($top_item); }
+      eval { $topstat = Sys->stat($top_dir); }
       if ($@) {
         if ($warn) {
-          warn "Can't stat $top_item: $@";
+          warn "Can't stat $top_dir: $@";
         }
         return;
       }
     }
     else {
-      eval { $topstat = Sys->lstat($top_item); }
+      eval { $topstat = Sys->lstat($top_dir); }
       if ($@) {
         if ($warn) {
-          warn "Can't lstat $top_item: $@";
+          warn "Can't lstat $top_dir: $@";
         }
         return;
       }
@@ -264,27 +264,27 @@ class File::Find {
     
     # canonicalize directory separators
     if (Sys::OS->is_windows) {
-      Re->s(my $_ = [$top_item], ["[/\\\\]", "g"], "/");
-      $top_item = $_->[0];
+      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
+      $top_dir = $_->[0];
     }
     
     # no trailing / unless path is root
-    unless (&_is_root($top_item)) {
-      Re->s(my $_ = [$top_item], "/\z", "");
-      $top_item = $_->[0];
+    unless (&_is_root($top_dir)) {
+      Re->s(my $_ = [$top_dir], "/\z", "");
+      $top_dir = $_->[0];
     }
     
     $Is_Dir= 0;
     
     if ($follow) {
-      if (&_is_absolute($top_item)) {
-        $abs_dir = $top_item;
+      if (&_is_absolute($top_dir)) {
+        $abs_dir = $top_dir;
       }
-      elsif ($top_item eq $self->{current_dir}) {
+      elsif ($top_dir eq $self->{current_dir}) {
         $abs_dir = $cwd;
       }
       else {  # care about any  ../
-        $abs_dir = $self->contract_name("$cwd/", $top_item);
+        $abs_dir = $self->contract_name("$cwd/", $top_dir);
       }
       $abs_dir = $self->Follow_SymLink($abs_dir);
       unless ($abs_dir) {
@@ -292,18 +292,18 @@ class File::Find {
       }
       
       if ($topstat->d) {
-        $self->_find_dir_symlnk($wanted_callback, $abs_dir, $top_item);
+        $self->_find_dir_symlnk($wanted_callback, $abs_dir, $top_dir);
         $Is_Dir= 1;
       }
     }
     else { # no follow
     
       if ($topstat->d) {
-        $self->_find_dir($wanted_callback, $top_item);
+        $self->_find_dir($wanted_callback, $top_dir);
         $Is_Dir = 1;
       }
       else {
-        $abs_dir = $top_item;
+        $abs_dir = $top_dir;
       }
     }
     
@@ -314,7 +314,7 @@ class File::Find {
       
       unless ($dir) {
         $dir = "./";
-        $base_name = $top_item;
+        $base_name = $top_dir;
       }
       
       $abs_dir = $dir;
