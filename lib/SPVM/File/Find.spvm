@@ -497,11 +497,6 @@ class File::Find {
       my $no_nlink = 1;
       
       {
-        # HACK: insert directories at this position, so as to preserve
-        # the user pre-processed ordering of files (thus ensuring
-        # directory traversal is in user sorted order, not at random).
-        my $stack_top = $Stack->length;
-        
         for my $FN (@$filenames) {
           if (Re->m($FN, $self->{skip_pattern})) {
             next;
@@ -513,10 +508,7 @@ class File::Find {
           my $sub_nlink = (my $sub_lstat = Sys->lstat($no_chdir ? $dir_pref . $FN : $FN))->st_nlink;
           
           if ($sub_lstat->d) {
-            # HACK: replace push to preserve dir traversal order
-            #push @Stack,[$CdLvl,$dir_name,$FN,$sub_nlink];
-            $Stack->splice($stack_top, 0,
-                     [(object)[(object)$CdLvl, $dir_name, $FN, $sub_nlink]]);
+            $Stack->push([(object)$CdLvl, $dir_name, $FN, $sub_nlink]);
           }
           else {
             $info->{name} = $dir_pref . $FN;
