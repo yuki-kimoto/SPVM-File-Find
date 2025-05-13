@@ -332,7 +332,6 @@ class File::Find {
   
   method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string, $nlink : long) {
     
-    my $CdLvl = 0;
     my $Level = 0;
     my $Stack = List->new;
     my $SE = (object[])undef;
@@ -434,7 +433,7 @@ class File::Find {
           my $sub_nlink = (my $sub_lstat = Sys->lstat($dir_pref . $file_name))->st_nlink;
           
           if ($sub_lstat->d) {
-            $Stack->push([(object)$CdLvl, $dir_name, $file_name, $sub_nlink]);
+            $Stack->push([(object)0, $dir_name, $file_name, $sub_nlink]);
           }
           else {
             $info->{name} = $dir_pref . $file_name;
