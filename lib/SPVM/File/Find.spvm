@@ -364,13 +364,11 @@ class File::Find {
         $loop_started++;
       }
       
-      {
-        $info->{dir} = $parent_dir;
-        $info->{name} = $dir;
-        $wanted_callback->($info);
-        if ($info->{prune}) {
-          next;
-        }
+      $info->{dir} = $parent_dir;
+      $info->{name} = $dir;
+      $wanted_callback->($info);
+      if ($info->{prune}) {
+        next;
       }
       
       $info->{dir} = $dir;
