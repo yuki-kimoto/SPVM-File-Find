@@ -332,7 +332,6 @@ class File::Find {
   
   method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string) {
     
-    my $Level = 0;
     my $Stack = List->new;
     my $SE = (object[])undef;
     my $dir_name = $p_dir;
@@ -356,9 +355,8 @@ class File::Find {
           
           $SE = (object[])$Stack->pop;
           
-          $Level = $SE->[0]->(int);
-          $p_dir = $SE->[1]->(string);
-          $dir_rel = $SE->[2]->(string);
+          $p_dir = $SE->[0]->(string);
+          $dir_rel = $SE->[1]->(string);
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
           $dir_pref = "$dir_name/";
@@ -412,7 +410,7 @@ class File::Find {
           my $sub_lstat = Sys->lstat($dir_pref . $file_name);
           
           if ($sub_lstat->d) {
-            $Stack->push([(object)0, $dir_name, $file_name]);
+            $Stack->push([(object)$dir_name, $file_name]);
           }
           else {
             $info->{name} = $dir_pref . $file_name;
