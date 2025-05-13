@@ -105,67 +105,89 @@ class File::Find {
     my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $follow = $self->{follow};
     
-    my $dir = $top_dir;
-    my $dir_with_slash = &_is_root($dir) ? $dir : "$dir/";
+    my $tree_queue = List->new;
     
-    my $cwd = Cwd->getcwd();
-    my $fullname = (string)undef;
-    my $fullname_with_slash = (string)undef;
-    if ($follow_or_follow_fast) {
-      my $top_dir_for_fullname = (string)undef;
-      if (&_is_absolute($top_dir)) {
-        $top_dir_for_fullname = $top_dir;
-      }
-      elsif ($top_dir eq $self->{current_dir}) {
-        $top_dir_for_fullname = $cwd;
-      }
-      else {  # care about any  ../
-        $top_dir_for_fullname = $self->_contract_name("$cwd/", $top_dir);
-      }
-      $fullname = $self->_Follow_SymLink($top_dir_for_fullname);
-      $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
-    }
+    my $base_name = (string)undef;
     
-    my $tree_stack = List->new(new IO::Dir[0]);
-    my $dirs_stack = List->new;
-    my $new_fullname = (string)undef;
-    my $loop_started = 0;
+    my $is_top_dir = 1;
+    
+    $tree_queue->push([(object)$top_dir, $base_name, $is_top_dir]);
+    
     while (1) {
+      
+      unless ($tree_queue->length > 0) {
+        last;
+      }
+      
+      my $tree_info = (object[])$tree_queue->shift;
+      
       my $info = File::Find::Info->new;
       
-      if ($loop_started) {
-        my $SE = (object[])undef;
-        if ($dirs_stack->length > 0) {
-          
-          $SE = (object[])$dirs_stack->pop;
-          
-          $dir = $SE->[0]->(string);
-          my $base_name = $SE->[1]->(string);
-          my $fullname = $SE->[2]->(string);
-          
-          $dir = &_is_root($dir) ? "$dir$base_name" : "$dir/$base_name";
-          $dir_with_slash = "$dir/";
-          if ($follow_or_follow_fast) {
-            $fullname_with_slash = "$fullname/";
+      my $dir = $tree_info->[0]->(string);
+      my $base_name = $tree_info->[1]->(string);
+      my $is_top_dir = $tree_info->[2]->(int);
+      
+      my $name = (string)undef;
+      if ($is_top_dir) {
+        $name = $dir;
+      }
+      else {
+        my $dir_with_slash = &_is_root($dir) ? $dir : "$dir/";
+        $name = $dir_with_slash . $base_name;
+      }
+      
+      $info->{dir} = $dir;
+      $info->{name} = $name;
+      if ($follow_or_follow_fast) {
+        my $dir_for_fullname = (string)undef;
+        if ($is_top_dir) {
+          my $cwd = Cwd->getcwd();
+          my $fullname = (string)undef;
+          my $fullname_with_slash = (string)undef;
+          if (&_is_absolute($dir)) {
+            $dir_for_fullname = $dir;
+          }
+          elsif ($dir eq $self->{current_dir}) {
+            $dir_for_fullname = $cwd;
+          }
+          else {  # care about any  ../
+            $dir_for_fullname = $self->_contract_name("$cwd/", $dir);
           }
         }
         else {
-          last;
+          $dir_for_fullname = $dir;
+        }
+        
+        my $dir_for_fullname_with_slash = &_is_root($dir_for_fullname) ? $dir_for_fullname : "$dir_for_fullname/";
+        my $name_for_fullname = $dir_for_fullname_with_slash . $base_name;
+        
+        if (Sys->l($name_for_fullname)) {
+          my $fullname = $self->_Follow_SymLink($name_for_fullname);
+          $info->{fullname} = $fullname;
+        }
+      }
+      
+      $cb->($info);
+      
+      $dir = $name;
+      
+      my $open_dir = 0;
+      if (Sys->l($dir)) {
+        if ($follow_or_follow_fast) {
+          if (Sys->d($dir)) {
+            $open_dir = 1;
+          }
         }
       }
       else {
-        $loop_started++;
+        if (Sys->d($dir)) {
+          $open_dir = 1;
+        }
       }
       
-      $info->{dir} = $dir;
-      $info->{name} = $dir;
-      $info->{fullname} = $fullname;
-      $cb->($info);
-      if ($info->{prune}) {
+      unless ($open_dir) {
         next;
       }
-      
-      $info->{dir} = $dir;
       
       # Get the list of files in the current directory.
       my $dh = (IO::Dir)undef;
@@ -176,50 +198,14 @@ class File::Find {
         }
         next;
       }
-      my $base_names_list = StringList->new;
       while (my $dirent = $dh->read) {
-        $base_names_list->push($dirent->d_name);
-      }
-      $dh->close;
-      
-      my $base_names = $base_names_list->to_array;
-      for my $base_name (@$base_names) {
+        my $base_name = $dirent->d_name;
+        
         if (Re->m($base_name, $self->{skip_pattern})) {
           next;
         }
         
-        my $name = $dir_with_slash . $base_name;
-        
-        # follow symbolic links / do an lstat
-        if ($follow_or_follow_fast) {
-          $new_fullname = $self->_Follow_SymLink($fullname_with_slash . $base_name);
-          
-          # ignore if invalid symlink
-          unless ($new_fullname) {
-            $info->{fullname} = $fullname_with_slash . $base_name;
-            $info->{name} = $dir_with_slash . $base_name;
-            $cb->($info);
-            next;
-          }
-        }
-        
-        my $lstat = (Sys::IO::Stat)undef;
-        eval { $lstat = Sys->lstat($name); }
-        if ($@) {
-          if ($warn) {
-            warn "Can't lstat($name): $@";
-          }
-          next;
-        }
-        
-        if ($lstat->d) {
-          $dirs_stack->push([(object)$dir, $base_name, $new_fullname]);
-        }
-        else {
-          $info->{fullname} = $new_fullname;
-          $info->{name} = $name;
-          $cb->($info);
-        }
+        $tree_queue->push([(object)$dir, $base_name, 0]);
       }
     }
   }
