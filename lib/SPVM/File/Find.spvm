@@ -339,11 +339,10 @@ class File::Find {
     
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
     
-    my $info = File::Find::Info->new;
-    
     my $loop_started = 0;
-    
     while (1) {
+      my $info = File::Find::Info->new;
+      
       if ($loop_started) {
         my $SE = (object[])undef;
         if ($dirs_stack->length > 0) {
