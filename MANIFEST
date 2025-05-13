@@ -18,6 +18,12 @@ MANIFEST.SKIP
 README.md
 t/basic.t
 t/lib/SPVM/TestCase/File/Find.spvm
+t/test_files/dir1/dir1/file1.txt
+t/test_files/dir1/dir1/file2.txt
+t/test_files/dir1/file1.txt
+t/test_files/dir1/file2.txt
+t/test_files/dir2/file1.txt
+t/test_files/dir2/file2.txt
 t/test_files/lib/SPVM/File/Find.pm
 t/test_files/lib/SPVM/File/Find.spvm
 t/test_files/lib/SPVM/File/Find/Callback.pm

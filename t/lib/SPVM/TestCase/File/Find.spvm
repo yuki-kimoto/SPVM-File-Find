@@ -9,7 +9,7 @@ class TestCase::File::Find {
   static method test : int () {
     
     {
-      my $dir = "t/test_files/lib";
+      my $dir = "t/test_files";
       
       my $files_list = StringList->new;
       
@@ -28,16 +28,16 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "t/test_files/lib",
-        "t/test_files/lib/SPVM",
-        "t/test_files/lib/SPVM/File",
-        "t/test_files/lib/SPVM/File/Find",
-        "t/test_files/lib/SPVM/File/Find.pm",
-        "t/test_files/lib/SPVM/File/Find.spvm",
-        "t/test_files/lib/SPVM/File/Find/Callback.pm",
-        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
-        "t/test_files/lib/SPVM/File/Find/Info.pm",
-        "t/test_files/lib/SPVM/File/Find/Info.spvm",
+        "t/test_files",
+        "t/test_files/dir1",
+        "t/test_files/dir1/dir1",
+        "t/test_files/dir1/dir1/file1.txt",
+        "t/test_files/dir1/dir1/file2.txt",
+        "t/test_files/dir1/file1.txt",
+        "t/test_files/dir1/file2.txt",
+        "t/test_files/dir2",
+        "t/test_files/dir2/file1.txt",
+        "t/test_files/dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -47,7 +47,7 @@ class TestCase::File::Find {
     }
     
     {
-      my $dir = "t/test_files/lib";
+      my $dir = "t/test_files";
       
       my $files_list = StringList->new;
       
@@ -66,16 +66,16 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "t/test_files/lib",
-        "t/test_files/lib/SPVM",
-        "t/test_files/lib/SPVM/File",
-        "t/test_files/lib/SPVM/File/Find",
-        "t/test_files/lib/SPVM/File/Find.pm",
-        "t/test_files/lib/SPVM/File/Find.spvm",
-        "t/test_files/lib/SPVM/File/Find/Callback.pm",
-        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
-        "t/test_files/lib/SPVM/File/Find/Info.pm",
-        "t/test_files/lib/SPVM/File/Find/Info.spvm",
+        "t/test_files",
+        "t/test_files/dir1",
+        "t/test_files/dir1/dir1",
+        "t/test_files/dir1/dir1/file1.txt",
+        "t/test_files/dir1/dir1/file2.txt",
+        "t/test_files/dir1/file1.txt",
+        "t/test_files/dir1/file2.txt",
+        "t/test_files/dir2",
+        "t/test_files/dir2/file1.txt",
+        "t/test_files/dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -85,7 +85,7 @@ class TestCase::File::Find {
     }
     
     {
-      my $dir = "t/test_files/lib/";
+      my $dir = "t/test_files/";
       
       my $files_list = StringList->new;
       
@@ -104,16 +104,16 @@ class TestCase::File::Find {
       Sort->sort_string_asc($files);
       
       my $files_expected = [
-        "t/test_files/lib",
-        "t/test_files/lib/SPVM",
-        "t/test_files/lib/SPVM/File",
-        "t/test_files/lib/SPVM/File/Find",
-        "t/test_files/lib/SPVM/File/Find.pm",
-        "t/test_files/lib/SPVM/File/Find.spvm",
-        "t/test_files/lib/SPVM/File/Find/Callback.pm",
-        "t/test_files/lib/SPVM/File/Find/Callback.spvm",
-        "t/test_files/lib/SPVM/File/Find/Info.pm",
-        "t/test_files/lib/SPVM/File/Find/Info.spvm",
+        "t/test_files",
+        "t/test_files/dir1",
+        "t/test_files/dir1/dir1",
+        "t/test_files/dir1/dir1/file1.txt",
+        "t/test_files/dir1/dir1/file2.txt",
+        "t/test_files/dir1/file1.txt",
+        "t/test_files/dir1/file2.txt",
+        "t/test_files/dir2",
+        "t/test_files/dir2/file1.txt",
+        "t/test_files/dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -125,7 +125,7 @@ class TestCase::File::Find {
     {
       my $cwd = Cwd->getcwd;
       
-      my $dir = "$cwd/t/test_files/lib";
+      my $dir = "$cwd/t/test_files";
       
       my $files_list = StringList->new;
       
@@ -145,15 +145,15 @@ class TestCase::File::Find {
       
       my $files_expected = [
         "$dir",
-        "$dir/SPVM",
-        "$dir/SPVM/File",
-        "$dir/SPVM/File/Find",
-        "$dir/SPVM/File/Find.pm",
-        "$dir/SPVM/File/Find.spvm",
-        "$dir/SPVM/File/Find/Callback.pm",
-        "$dir/SPVM/File/Find/Callback.spvm",
-        "$dir/SPVM/File/Find/Info.pm",
-        "$dir/SPVM/File/Find/Info.spvm",
+        "$dir/dir1",
+        "$dir/dir1/dir1",
+        "$dir/dir1/dir1/file1.txt",
+        "$dir/dir1/dir1/file2.txt",
+        "$dir/dir1/file1.txt",
+        "$dir/dir1/file2.txt",
+        "$dir/dir2",
+        "$dir/dir2/file1.txt",
+        "$dir/dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -165,7 +165,7 @@ class TestCase::File::Find {
     {
       my $cwd = Cwd->getcwd;
       
-      my $dir = "$cwd/t/test_files/lib/";
+      my $dir = "$cwd/t/test_files/";
       
       my $files_list = StringList->new;
       
@@ -188,15 +188,15 @@ class TestCase::File::Find {
       
       my $files_expected = [
         "$dir_no_slash",
-        "$dir_no_slash/SPVM",
-        "$dir_no_slash/SPVM/File",
-        "$dir_no_slash/SPVM/File/Find",
-        "$dir_no_slash/SPVM/File/Find.pm",
-        "$dir_no_slash/SPVM/File/Find.spvm",
-        "$dir_no_slash/SPVM/File/Find/Callback.pm",
-        "$dir_no_slash/SPVM/File/Find/Callback.spvm",
-        "$dir_no_slash/SPVM/File/Find/Info.pm",
-        "$dir_no_slash/SPVM/File/Find/Info.spvm",
+        "$dir_no_slash/dir1",
+        "$dir_no_slash/dir1/dir1",
+        "$dir_no_slash/dir1/dir1/file1.txt",
+        "$dir_no_slash/dir1/dir1/file2.txt",
+        "$dir_no_slash/dir1/file1.txt",
+        "$dir_no_slash/dir1/file2.txt",
+        "$dir_no_slash/dir2",
+        "$dir_no_slash/dir2/file1.txt",
+        "$dir_no_slash/dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
@@ -206,7 +206,7 @@ class TestCase::File::Find {
     }
     
     {
-      Sys::IO->chdir("t/test_files/lib");
+      Sys::IO->chdir("t/test_files");
       my $dir = ".";
       
       my $files_list = StringList->new;
@@ -227,15 +227,15 @@ class TestCase::File::Find {
       
       my $files_expected = [
         ".",
-        "./SPVM",
-        "./SPVM/File",
-        "./SPVM/File/Find",
-        "./SPVM/File/Find.pm",
-        "./SPVM/File/Find.spvm",
-        "./SPVM/File/Find/Callback.pm",
-        "./SPVM/File/Find/Callback.spvm",
-        "./SPVM/File/Find/Info.pm",
-        "./SPVM/File/Find/Info.spvm",
+        "./dir1",
+        "./dir1/dir1",
+        "./dir1/dir1/file1.txt",
+        "./dir1/dir1/file2.txt",
+        "./dir1/file1.txt",
+        "./dir1/file2.txt",
+        "./dir2",
+        "./dir2/file1.txt",
+        "./dir2/file2.txt",
       ];
       
       unless (Array->equals_string($files, $files_expected)) {
