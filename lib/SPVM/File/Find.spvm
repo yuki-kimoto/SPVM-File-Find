@@ -355,7 +355,6 @@ class File::Find {
       my $info = File::Find::Info->new;
       $info->{dir} = $dir;
       $info->{name} = $name;
-      $info->{_} = $base_name;
       
       $wanted_callback->($info);
     }
@@ -422,7 +421,6 @@ class File::Find {
           if ($nlink == -2) {
             $info->{name} = $p_dir;
             $info->{dir} = $p_dir;
-            $info->{_} = $self->{current_dir};
           }
           elsif ($nlink < 0) {  # must be finddepth, report dirname now
             $info->{name} = $dir_name;
@@ -431,11 +429,6 @@ class File::Find {
               $info->{name} = $_->[0];
             }
             $info->{dir} = $p_dir;
-            $info->{_} = ($no_chdir ? $dir_name : $dir_rel);
-            if (Fn->substr($info->{_}, -2) eq "/." ) {
-              Fn->substr(my $_ = [$info->{_}], length($info->{_}) == 2 ? length($info->{_}) - 1 : length($info->{_}) - 2, -1, "");
-              $info->{_} = $_->[0];
-            }
             $wanted_callback->($info);
           }
           else {
@@ -455,7 +448,6 @@ class File::Find {
       {
         $info->{dir} = $p_dir;
         $info->{name} = $dir_name;
-        $info->{_} = ($no_chdir ? $dir_name : $dir_rel );
         $wanted_callback->($info);
         if ($info->{prune}) {
           next;
@@ -512,7 +504,6 @@ class File::Find {
           }
           else {
             $info->{name} = $dir_pref . $FN;
-            $info->{_} = ($no_chdir ? $info->{name} : $FN);
             $wanted_callback->($info);
           }
         }
@@ -596,11 +587,9 @@ class File::Find {
         }
         $info->{dir} = $p_dir;
         $info->{name} = $dir_name;
-        $info->{_} = ($no_chdir ? $dir_name : $dir_rel);
         $info->{fullname} = $dir_loc;
         # prune may happen here
         $info->{prune} = 0;
-        $lstat = Sys->lstat($info->{_}); # make sure  file tests with '_' work
         $wanted_callback->($info);
         if ($info->prune) {
           next;
@@ -656,7 +645,6 @@ class File::Find {
             $info->{fullname} = $loc_pref . $FN;
           }
           $info->{name} = $dir_pref . $FN;
-          $info->{_} = ($no_chdir ? $info->{name} : $FN);
           $wanted_callback->($info);
           next;
         }
@@ -667,7 +655,6 @@ class File::Find {
         else {
           $info->{fullname} = $new_loc;
           $info->{name} = $dir_pref . $FN;
-          $info->{_} = ($no_chdir ? $info->{name} : $FN);
           $wanted_callback->($info);
         }
       }

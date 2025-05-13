@@ -4,6 +4,7 @@
     * Remove dont_use_nlink option.
     * Remove preprocess option.
     * Remove postprocess option.
+    * Remove File::Find::Info->_ field.
     
 0.027 2025-05-10
   [Document Improvement]

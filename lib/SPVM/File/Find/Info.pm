@@ -40,14 +40,6 @@ The complete pathname to the file.
 
 See C<$File::Find::name> in L<File::Find wanted function|File::Find/"wanted"> for details.
 
-=head2 _
-
-C<has _ : ro string;>
-
-The current filename within that directory.
-
-See C<$_> in L<File::Find wanted function|File::Find/"wanted"> for details.
-
 =head2 fullname
 
 C<has fullname : ro string;>
