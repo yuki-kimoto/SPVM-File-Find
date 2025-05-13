@@ -558,7 +558,6 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
     my $no_chdir = $self->{no_chdir};
-    my $postprocess = $self->{postprocess};
     my $dangling_symlinks = $self->{dangling_symlinks};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
