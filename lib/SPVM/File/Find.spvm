@@ -69,8 +69,6 @@ class File::Find {
       }
     }
     
-    $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
-    
     $self->{SLnkSeen} = Hash->new;
     
     $self->{current_dir} = File::Spec->curdir // ".";
@@ -239,7 +237,6 @@ class File::Find {
     # call find() or finddepth()
     
     my $cwd            = Cwd->getcwd();
-    my $no_chdir          = $self->{no_chdir};
     my $full_check        = $self->full_check;
     my $follow            = $self->follow_or_follow_fast;
     my $follow_skip       = $self->{follow_skip};
@@ -325,21 +322,7 @@ class File::Find {
       
       $abs_dir = $dir;
       
-      my $success_chdir = 0;
-      eval { Sys->chdir($abs_dir); }
-      unless ($@) {
-        $success_chdir = 1;
-      }
-      unless ($no_chdir || $success_chdir) {
-        if ($warn) {
-          warn "Couldn't chdir $abs_dir";
-        }
-        return;
-      }
       my $name = $abs_dir . $base_name;
-      if ($no_chdir) {
-        $base_name = $name;
-      }
       
       my $info = File::Find::Info->new;
       $info->{dir} = $dir;
@@ -348,9 +331,6 @@ class File::Find {
       $wanted_callback->($info);
     }
     
-    unless ($no_chdir) {
-      Sys->chdir($cwd);
-    }
   }
   
   method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string, $nlink : long) {
@@ -361,25 +341,12 @@ class File::Find {
     my $SE = (object[])undef;
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
-    my $no_chdir = $self->{no_chdir};
     
     my $warn = $self->{warn};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
     
     my $info = File::Find::Info->new;
-    
-    unless ($no_chdir || ($p_dir eq $self->{current_dir})) {
-      my $udir = $p_dir;
-      eval { Sys->chdir($udir); }
-      
-      if ($@) {
-        if ($warn) {
-          warn "Can't cd to $udir: $@";
-        }
-        return;
-      }
-    }
     
     my $loop_started = 0;
     
@@ -397,12 +364,6 @@ class File::Find {
           $p_dir = $SE->[1]->(string);
           $dir_rel = $SE->[2]->(string);
           $nlink = $SE->[3]->(long);
-          
-          if ($CdLvl > $Level && !$no_chdir) {
-            my $tmp = Fn->join("/", (string[])Array->repeat([".."], $CdLvl - $Level));
-            Sys->chdir($tmp);
-            $CdLvl = $Level;
-          }
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
           $dir_pref = "$dir_name/";
@@ -443,24 +404,11 @@ class File::Find {
         }
       }
       
-      # change to that directory
-      unless ($no_chdir || ($dir_rel eq $self->{current_dir})) {
-        my $udir= $dir_rel;
-        eval { Sys->chdir($udir); }
-        if ($@) {
-          if ($warn) {
-            warn "Can't cd to (" . ($p_dir ne "/" ? $p_dir : "") . "/) $udir: $@";
-          }
-          next;
-        }
-        $CdLvl++;
-      }
-      
       $info->{dir} = $dir_name;
       
       # Get the list of files in the current directory.
       my $dh = (IO::Dir)undef;
-      eval { $dh = IO::Dir->new($no_chdir ? $dir_name : $self->{current_dir}); }
+      eval { $dh = IO::Dir->new($dir_name); }
       if ($@) {
         if ($warn) {
           warn "Can't opendir($dir_name): $@";
@@ -486,7 +434,7 @@ class File::Find {
           # Seen all the subdirs?
           # check for directoriness.
           # stat is faster for a file in the current directory
-          my $sub_nlink = (my $sub_lstat = Sys->lstat($no_chdir ? $dir_pref . $FN : $FN))->st_nlink;
+          my $sub_nlink = (my $sub_lstat = Sys->lstat($dir_pref . $FN))->st_nlink;
           
           if ($sub_lstat->d) {
             $Stack->push([(object)$CdLvl, $dir_name, $FN, $sub_nlink]);
@@ -508,25 +456,11 @@ class File::Find {
     my $dir_name = $p_dir;
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
-    my $no_chdir = $self->{no_chdir};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
     my $loc_pref = &_is_root($dir_loc) ? $dir_loc : "$dir_loc/";
     
     my $info = File::Find::Info->new;
-    
-    unless ($no_chdir) {
-      unless ($p_dir eq $self->{current_dir}) {
-        eval { Sys->chdir($updir_loc); }
-        
-        if ($@) {
-          if ($warn) {
-            warn "Can't cd to $updir_loc: $@";
-          }
-          return;
-        }
-      }
-    }
     
     my $lstat = (Sys::IO::Stat)undef;
     
@@ -563,16 +497,6 @@ class File::Find {
       }
       
       {
-        # change (back) to parent directory (always untainted)
-        unless ($no_chdir) {
-          eval { Sys->chdir($updir_loc); }
-          if ($@) {
-            if ($warn) {
-              warn "Can't cd to $updir_loc: $@";
-            }
-            next;
-          }
-        }
         $info->{dir} = $p_dir;
         $info->{name} = $dir_name;
         $info->{fullname} = $dir_loc;
@@ -584,23 +508,11 @@ class File::Find {
         }
       }
       
-      # change to that directory
-      unless ($no_chdir || ($dir_rel eq $self->{current_dir})) {
-        $updir_loc = $dir_loc;
-        eval { Sys->chdir($updir_loc); }
-        if ($@) {
-          if ($warn) {
-            warn "Can't cd to $updir_loc: $@";
-          }
-          next;
-        }
-      }
-      
       $info->{dir} = $dir_name;
       
       # Get the list of files in the current directory.
       my $dh = (IO::Dir)undef;
-      eval { $dh = IO::Dir->new($no_chdir ? $dir_loc : $self->{current_dir}); }
+      eval { $dh = IO::Dir->new($dir_loc); }
       
       if ($@) {
         if ($warn) {
