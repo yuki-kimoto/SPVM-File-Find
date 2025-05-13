@@ -330,15 +330,15 @@ class File::Find {
     
   }
   
-  method _find_dir : void ($wanted_callback : File::Find::Callback, $p_dir : string) {
+  method _find_dir : void ($wanted_callback : File::Find::Callback, $parent_dir : string) {
     
     my $dirs_stack = List->new;
-    my $dir_name = $p_dir;
+    my $dir_name = $parent_dir;
     my $dir_rel = $self->{current_dir};
     
     my $warn = $self->{warn};
     
-    my $dir_name_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
+    my $dir_name_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
     
     my $info = File::Find::Info->new;
     
@@ -351,10 +351,10 @@ class File::Find {
           
           $SE = (object[])$dirs_stack->pop;
           
-          $p_dir = $SE->[0]->(string);
+          $parent_dir = $SE->[0]->(string);
           $dir_rel = $SE->[1]->(string);
           
-          $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
+          $dir_name = &_is_root($parent_dir) ? "$parent_dir$dir_rel" : "$parent_dir/$dir_rel";
           $dir_name_with_slash = "$dir_name/";
         }
         else {
@@ -366,7 +366,7 @@ class File::Find {
       }
       
       {
-        $info->{dir} = $p_dir;
+        $info->{dir} = $parent_dir;
         $info->{name} = $dir_name;
         $wanted_callback->($info);
         if ($info->{prune}) {
@@ -411,16 +411,16 @@ class File::Find {
     }
   }
   
-  method _find_dir_symlnk : void ($wanted_callback : File::Find::Callback, $dir_loc : string, $p_dir : string) {
+  method _find_dir_symlnk : void ($wanted_callback : File::Find::Callback, $dir_loc : string, $parent_dir : string) {
     my $dirs_stack = List->new;
     my $new_loc = (string)undef;
     my $updir_loc = $dir_loc; # untainted parent directory
     my $SE = (object[])undef;
-    my $dir_name = $p_dir;
+    my $dir_name = $parent_dir;
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
     
-    my $dir_name_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
+    my $dir_name_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
     my $loc_pref = &_is_root($dir_loc) ? $dir_loc : "$dir_loc/";
     
     my $info = File::Find::Info->new;
@@ -442,9 +442,9 @@ class File::Find {
           
           $dir_loc = $SE->[0]->(string);
           $updir_loc = $SE->[1]->(string);
-          $p_dir = $SE->[2]->(string);
+          $parent_dir = $SE->[2]->(string);
           
-          $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
+          $dir_name = &_is_root($parent_dir) ? "$parent_dir$dir_rel" : "$parent_dir/$dir_rel";
           $dir_name_with_slash = "$dir_name/";
           $loc_pref = "$dir_loc/";
           last;
@@ -460,7 +460,7 @@ class File::Find {
       }
       
       {
-        $info->{dir} = $p_dir;
+        $info->{dir} = $parent_dir;
         $info->{name} = $dir_name;
         $info->{fullname} = $dir_loc;
         # prune may happen here
