@@ -57,14 +57,6 @@ Causes symbolic links to be followed.
 
 See L<File::Find/"follow"> option for details.
 
-=head2 follow_fast
-
-C<has follow_fast : ro byte;>
-
-This is similar to follow except that it may report some files more than once.
-
-See L<File::Find/"follow_fast"> option for details.
-
 =head2 follow_skip
 
 C<has follow_skip : ro byte;>
@@ -95,17 +87,11 @@ C<follow : Int = 0>
 
 Set L</"follow"> field to this value.
 
-=item * follow_fast
-
-C<follow_fast : Int = 0>
-
-Set L</"follow_fast"> field to this value.
-
 =item * follow_skip
 
 C<follow_skip : Int = 0>
 
-If C<follow> or C<follow_fast> option is a true value and this option is not specified, the value is set to 1, otherwise set to 0.
+If C<follow> option is a true value and this option is not specified, the value is set to 1, otherwise set to 0.
 
 Set L</"follow_skip"> field to this value.
 

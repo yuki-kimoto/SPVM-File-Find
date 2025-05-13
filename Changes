@@ -8,6 +8,8 @@
     * Remove File::Find::Info->_ field.
     * Remove dangling_symlinks option.
     * Remove no_chdir option.
+    * Remove File::Find::Info->prune field.
+    * Remove follow_fast option.
     
 0.027 2025-05-10
   [Document Improvement]
