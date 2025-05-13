@@ -412,32 +412,32 @@ class File::Find {
         }
         next;
       }
-      my $filenames_list = StringList->new;
+      my $file_names_list = StringList->new;
       while (my $dirent = $dh->read) {
-        $filenames_list->push($dirent->d_name);
+        $file_names_list->push($dirent->d_name);
       }
       $dh->close;
       
-      my $filenames = $filenames_list->to_array;
+      my $file_names = $file_names_list->to_array;
       
       my $no_nlink = 1;
       
       {
-        for my $FN (@$filenames) {
-          if (Re->m($FN, $self->{skip_pattern})) {
+        for my $file_name (@$file_names) {
+          if (Re->m($file_name, $self->{skip_pattern})) {
             next;
           }
           
           # Seen all the subdirs?
           # check for directoriness.
           # stat is faster for a file in the current directory
-          my $sub_nlink = (my $sub_lstat = Sys->lstat($dir_pref . $FN))->st_nlink;
+          my $sub_nlink = (my $sub_lstat = Sys->lstat($dir_pref . $file_name))->st_nlink;
           
           if ($sub_lstat->d) {
-            $Stack->push([(object)$CdLvl, $dir_name, $FN, $sub_nlink]);
+            $Stack->push([(object)$CdLvl, $dir_name, $file_name, $sub_nlink]);
           }
           else {
-            $info->{name} = $dir_pref . $FN;
+            $info->{name} = $dir_pref . $file_name;
             $wanted_callback->($info);
           }
         }
@@ -517,35 +517,35 @@ class File::Find {
         }
         next;
       }
-      my $filenames_list = StringList->new;
+      my $file_names_list = StringList->new;
       while (my $dirent = $dh->read) {
-        $filenames_list->push($dirent->d_name);
+        $file_names_list->push($dirent->d_name);
       }
       $dh->close;
-      my $filenames = $filenames_list->to_array;
+      my $file_names = $file_names_list->to_array;
       
-      for my $FN (@$filenames) {
-        if (Re->m($FN, $self->{skip_pattern})) {
+      for my $file_name (@$file_names) {
+        if (Re->m($file_name, $self->{skip_pattern})) {
           next;
         }
         
         # follow symbolic links / do an lstat
-        $new_loc = $self->Follow_SymLink($loc_pref . $FN);
+        $new_loc = $self->Follow_SymLink($loc_pref . $file_name);
 
         # ignore if invalid symlink
         unless ($new_loc) {
-          $info->{fullname} = $loc_pref . $FN;
-          $info->{name} = $dir_pref . $FN;
+          $info->{fullname} = $loc_pref . $file_name;
+          $info->{name} = $dir_pref . $file_name;
           $wanted_callback->($info);
           next;
         }
         
         if ($lstat->d) {
-          $Stack->push([(object)$new_loc, $updir_loc, $dir_name, $FN, 1]);
+          $Stack->push([(object)$new_loc, $updir_loc, $dir_name, $file_name, 1]);
         }
         else {
           $info->{fullname} = $new_loc;
-          $info->{name} = $dir_pref . $FN;
+          $info->{name} = $dir_pref . $file_name;
           $wanted_callback->($info);
         }
       }
