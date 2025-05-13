@@ -9,8 +9,6 @@ lib/SPVM/File/Find.pm
 lib/SPVM/File/Find.spvm
 lib/SPVM/File/Find/Callback.pm
 lib/SPVM/File/Find/Callback.spvm
-lib/SPVM/File/Find/Callback/DanglingSymlinks.pm
-lib/SPVM/File/Find/Callback/DanglingSymlinks.spvm
 lib/SPVM/File/Find/Info.pm
 lib/SPVM/File/Find/Info.spvm
 LICENSE

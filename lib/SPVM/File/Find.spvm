@@ -6,8 +6,6 @@ class File::Find {
   
   use File::Find::Info;
   use File::Find::Callback;
-  use File::Find::Callback::DanglingSymlinks;
-  use File::Find::Callback::Preprocess;
   
   use StringList;
   use Sys;
@@ -30,8 +28,6 @@ class File::Find {
   
   has follow_skip : ro byte;
   
-  has dangling_symlinks : ro File::Find::Callback::DanglingSymlinks;
-  
   has no_chdir : ro byte;
   
   has warn : ro byte;
@@ -52,7 +48,6 @@ class File::Find {
       "follow",
       "follow_fast",
       "follow_skip",
-      "dangling_symlinks",
       "no_chdir",
       "warn",
     ];
@@ -73,8 +68,6 @@ class File::Find {
         $self->{follow_skip} = 1;
       }
     }
-    
-    $self->{dangling_symlinks} = (File::Find::Callback::DanglingSymlinks)$options_h->get("dangling_symlinks");
     
     $self->{no_chdir} = (byte)$options_h->get_or_default_int("no_chdir", 0);
     
@@ -250,7 +243,6 @@ class File::Find {
     my $full_check        = $self->full_check;
     my $follow            = $self->follow_or_follow_fast;
     my $follow_skip       = $self->{follow_skip};
-    my $dangling_symlinks = $self->{dangling_symlinks};
     my $warn = $self->{warn};
     
     my $abs_dir = (string)undef;
@@ -302,9 +294,6 @@ class File::Find {
       }
       $abs_dir = $self->Follow_SymLink($abs_dir);
       unless ($abs_dir) {
-        if ($dangling_symlinks) {
-          $dangling_symlinks->($top_item, $cwd);
-        }
         return;
       }
       
@@ -520,7 +509,6 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
     my $no_chdir = $self->{no_chdir};
-    my $dangling_symlinks = $self->{dangling_symlinks};
     
     my $dir_pref = &_is_root($p_dir) ? $p_dir : "$p_dir/";
     my $loc_pref = &_is_root($dir_loc) ? $dir_loc : "$dir_loc/";
@@ -637,13 +625,7 @@ class File::Find {
 
         # ignore if invalid symlink
         unless ($new_loc) {
-          if (!$lstat->l && $dangling_symlinks) {
-            $info->{fullname} = undef;
-            $dangling_symlinks->($FN, $dir_pref);
-          }
-          else {
-            $info->{fullname} = $loc_pref . $FN;
-          }
+          $info->{fullname} = $loc_pref . $FN;
           $info->{name} = $dir_pref . $FN;
           $wanted_callback->($info);
           next;

@@ -71,14 +71,6 @@ C<has follow_skip : ro byte;>
 
 See L<File::Find/"follow_skip"> option for details.
 
-=head2 dangling_symlinks
-
-C<has dangling_symlinks : ro L<File::Find::Callback::DanglingSymlinks|SPVM::File::Find::Callback::DanglingSymlinks>;>
-
-Specifies what to do with symbolic links whose target doesn't exist.
-
-See L<File::Find/"dangling_symlinks"> option for details.
-
 =head2 no_chdir
 
 C<has no_chdir : ro byte;>
@@ -124,12 +116,6 @@ C<follow_skip : Int = 0>
 If C<follow> or C<follow_fast> option is a true value and this option is not specified, the value is set to 1, otherwise set to 0.
 
 Set L</"follow_skip"> field to this value.
-
-=item * dangling_symlinks
-
-C<dangling_symlinks : L<File::Find::Callback::DanglingSymlinks|SPVM::File::Find::Callback::DanglingSymlinks> = undef>
-
-Set L</"dangling_symlinks"> field to this value.
 
 =item * no_chdir
 
