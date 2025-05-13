@@ -156,10 +156,9 @@ class File::Find {
       else {  # care about any  ../
         $fullname = $self->_contract_name("$cwd/", $top_dir);
       }
-      $fullname = $self->Follow_SymLink($fullname);
+      $fullname = $self->_Follow_SymLink($fullname);
       $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
     }
-    
     
     my $dirs_stack = List->new;
     my $new_fullname = (string)undef;
@@ -226,7 +225,7 @@ class File::Find {
         
         # follow symbolic links / do an lstat
         if ($follow_or_follow_fast) {
-          $new_fullname = $self->Follow_SymLink($fullname_with_slash . $base_name);
+          $new_fullname = $self->_Follow_SymLink($fullname_with_slash . $base_name);
           
           # ignore if invalid symlink
           unless ($new_fullname) {
@@ -256,6 +255,10 @@ class File::Find {
         }
       }
     }
+  }
+  
+  private method follow_or_follow_fast : int () {
+    return $self->{follow} || $self->{follow_fast};
   }
   
   private method _contract_name : string ($cdir : string, $fn : string) {
@@ -320,11 +323,7 @@ class File::Find {
     return $AbsName;
   }
   
-  private method follow_or_follow_fast : int () {
-    return $self->{follow} || $self->{follow_fast};
-  }
-  
-  private method Follow_SymLink : string ($AbsName : string) {
+  private method _Follow_SymLink : string ($AbsName : string) {
     
     my $NewName = (string)undef;
     
