@@ -401,21 +401,19 @@ class File::Find {
       
       my $file_names = $file_names_list->to_array;
       
-      {
-        for my $file_name (@$file_names) {
-          if (Re->m($file_name, $self->{skip_pattern})) {
-            next;
-          }
-          
-          my $sub_lstat = Sys->lstat($dir_pref . $file_name);
-          
-          if ($sub_lstat->d) {
-            $Stack->push([(object)$dir_name, $file_name]);
-          }
-          else {
-            $info->{name} = $dir_pref . $file_name;
-            $wanted_callback->($info);
-          }
+      for my $file_name (@$file_names) {
+        if (Re->m($file_name, $self->{skip_pattern})) {
+          next;
+        }
+        
+        my $sub_lstat = Sys->lstat($dir_pref . $file_name);
+        
+        if ($sub_lstat->d) {
+          $Stack->push([(object)$dir_name, $file_name]);
+        }
+        else {
+          $info->{name} = $dir_pref . $file_name;
+          $wanted_callback->($info);
         }
       }
     }
