@@ -240,7 +240,7 @@ class File::Find {
   
   method _find_dir_symlnk : void ($cb : File::Find::Callback, $fullname : string, $parent_dir : string) {
     my $dirs_stack = List->new;
-    my $new_loc = (string)undef;
+    my $new_fullname = (string)undef;
     my $SE = (object[])undef;
     my $dir = $parent_dir;
     my $dir_rel = $self->{current_dir};
@@ -321,10 +321,10 @@ class File::Find {
         }
         
         # follow symbolic links / do an lstat
-        $new_loc = $self->Follow_SymLink($fullname_with_slash . $base_name);
+        $new_fullname = $self->Follow_SymLink($fullname_with_slash . $base_name);
 
         # ignore if invalid symlink
-        unless ($new_loc) {
+        unless ($new_fullname) {
           $info->{fullname} = $fullname_with_slash . $base_name;
           $info->{name} = $dir_with_slash . $base_name;
           $cb->($info);
@@ -332,10 +332,10 @@ class File::Find {
         }
         
         if ($lstat->d) {
-          $dirs_stack->push([(object)$new_loc, $dir, $base_name, 1]);
+          $dirs_stack->push([(object)$new_fullname, $dir, $base_name, 1]);
         }
         else {
-          $info->{fullname} = $new_loc;
+          $info->{fullname} = $new_fullname;
           $info->{name} = $dir_with_slash . $base_name;
           $cb->($info);
         }
