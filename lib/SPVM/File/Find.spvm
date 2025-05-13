@@ -159,9 +159,9 @@ class File::Find {
           $SE = (object[])$dirs_stack->pop;
           
           $parent_dir = $SE->[0]->(string);
-          my $dir_rel = $SE->[1]->(string);
+          my $base_name = $SE->[1]->(string);
           
-          $dir = &_is_root($parent_dir) ? "$parent_dir$dir_rel" : "$parent_dir/$dir_rel";
+          $dir = &_is_root($parent_dir) ? "$parent_dir$base_name" : "$parent_dir/$base_name";
           $dir_with_slash = "$dir/";
         }
         else {
