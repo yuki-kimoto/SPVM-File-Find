@@ -84,17 +84,23 @@ class File::Find {
       die "invalid top directory" ;
     }
     
-    # This function must local()ize everything because callbacks may
-    # call find() or finddepth()
+    # canonicalize directory separators
+    if (Sys::OS->is_windows) {
+      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
+      $top_dir = $_->[0];
+    }
     
-    my $cwd            = Cwd->getcwd();
-    my $full_check        = $self->full_check;
-    my $follow            = $self->follow_or_follow_fast;
-    my $follow_skip       = $self->{follow_skip};
+    # no trailing / unless path is root
+    unless (&_is_root($top_dir)) {
+      Re->s(my $_ = [$top_dir], "/\z", "");
+      $top_dir = $_->[0];
+    }
+    
+    my $follow = $self->follow_or_follow_fast;
     my $warn = $self->{warn};
     
     my $abs_dir = (string)undef;
-    my $Is_Dir = (string)undef;
+    my $is_dir = (string)undef;
     
     my $topstat = (Sys::IO::Stat)undef;
     if ($follow) {
@@ -116,21 +122,10 @@ class File::Find {
       }
     }
     
-    # canonicalize directory separators
-    if (Sys::OS->is_windows) {
-      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
-      $top_dir = $_->[0];
-    }
-    
-    # no trailing / unless path is root
-    unless (&_is_root($top_dir)) {
-      Re->s(my $_ = [$top_dir], "/\z", "");
-      $top_dir = $_->[0];
-    }
-    
-    $Is_Dir= 0;
+    $is_dir= 0;
     
     if ($follow) {
+      my $cwd = Cwd->getcwd();
       if (&_is_absolute($top_dir)) {
         $abs_dir = $top_dir;
       }
@@ -147,21 +142,20 @@ class File::Find {
       
       if ($topstat->d) {
         $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
-        $Is_Dir= 1;
+        $is_dir= 1;
       }
     }
     else { # no follow
-    
       if ($topstat->d) {
         $self->_find_dir($cb, $top_dir);
-        $Is_Dir = 1;
+        $is_dir = 1;
       }
       else {
         $abs_dir = $top_dir;
       }
     }
     
-    unless ($Is_Dir) {
+    unless ($is_dir) {
       my $_ = File::Basename->fileparse($abs_dir);
       my $base_name = $_->[0];
       my $dir = $_->[1];
