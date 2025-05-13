@@ -126,6 +126,7 @@ class File::Find {
       $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
     }
     
+    my $tree_stack = List->new(new IO::Dir[0]);
     my $dirs_stack = List->new;
     my $new_fullname = (string)undef;
     my $loop_started = 0;
