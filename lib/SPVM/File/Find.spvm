@@ -130,7 +130,7 @@ class File::Find {
         $abs_dir = $cwd;
       }
       else {  # care about any  ../
-        $abs_dir = $self->contract_name("$cwd/", $top_dir);
+        $abs_dir = $self->_contract_name("$cwd/", $top_dir);
       }
       $abs_dir = $self->Follow_SymLink($abs_dir);
       
@@ -343,7 +343,7 @@ class File::Find {
     }
   }
   
-  private method contract_name : string ($cdir : string, $fn : string) {
+  private method _contract_name : string ($cdir : string, $fn : string) {
     
     if ($fn eq $self->{current_dir}) {
       return Fn->substr($cdir, 0, Fn->rindex($cdir, "/"));
@@ -390,7 +390,7 @@ class File::Find {
       $AbsName= $Name;
     }
     else {
-      $AbsName= $self->contract_name($Base, $Name);
+      $AbsName= $self->_contract_name($Base, $Name);
     }
     
     # (simple) check for recursion
