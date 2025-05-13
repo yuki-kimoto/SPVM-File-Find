@@ -80,11 +80,8 @@ class File::Find {
   # Instance Methods
   method find : void ($cb : File::Find::Callback, $top_dir : string) {
     
-    my $follow_or_follow_fast = $self->follow_or_follow_fast;
-    my $follow = $self->{follow};
-    
     unless ($top_dir) {
-      die "invalid top directory" ;
+      die "The top directory \$top_dir must be defined." ;
     }
     
     # canonicalize directory separators
@@ -100,6 +97,8 @@ class File::Find {
     }
     
     my $warn = $self->{warn};
+    my $follow_or_follow_fast = $self->follow_or_follow_fast;
+    my $follow = $self->{follow};
     
     my $topstat = (Sys::IO::Stat)undef;
     if ($follow_or_follow_fast) {
