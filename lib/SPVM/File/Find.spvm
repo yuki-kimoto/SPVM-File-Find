@@ -80,11 +80,6 @@ class File::Find {
   # Instance Methods
   method find : void ($cb : File::Find::Callback, $top_dir : string) {
     
-    $self->_find_dir($cb, $top_dir);
-  }
-  
-  method _find_dir : void ($cb : File::Find::Callback, $top_dir : string) {
-    
     my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $follow = $self->{follow};
     
