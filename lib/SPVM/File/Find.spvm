@@ -359,27 +359,11 @@ class File::Find {
           $Level = $SE->[0]->(int);
           $p_dir = $SE->[1]->(string);
           $dir_rel = $SE->[2]->(string);
-          $nlink = $SE->[3]->(long);
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
           $dir_pref = "$dir_name/";
           
-          if ($nlink == -2) {
-            $info->{name} = $p_dir;
-            $info->{dir} = $p_dir;
-          }
-          elsif ($nlink < 0) {  # must be finddepth, report dirname now
-            $info->{name} = $dir_name;
-            if (Fn->substr($info->{name}, -2) eq "/.") {
-              Fn->substr(my $_ = [$info->{name}], length($info->{name}) == 2 ? length($info->{name}) - 1 : length($info->{name}) - 2, -1, "");
-              $info->{name} = $_->[0];
-            }
-            $info->{dir} = $p_dir;
-            $wanted_callback->($info);
-          }
-          else {
-            last;
-          }
+          last;
         }
         
         unless ($SE) {
