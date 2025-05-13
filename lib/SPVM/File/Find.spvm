@@ -78,8 +78,110 @@ class File::Find {
   }
   
   # Instance Methods
-  method find : void ($cb : File::Find::Callback, $dir : string) {
-    $self->_find_opt($cb, $dir);
+  method find : void ($cb : File::Find::Callback, $top_dir : string) {
+    
+    unless ($top_dir) {
+      die "invalid top directory" ;
+    }
+    
+    # This function must local()ize everything because callbacks may
+    # call find() or finddepth()
+    
+    my $cwd            = Cwd->getcwd();
+    my $full_check        = $self->full_check;
+    my $follow            = $self->follow_or_follow_fast;
+    my $follow_skip       = $self->{follow_skip};
+    my $warn = $self->{warn};
+    
+    my $abs_dir = (string)undef;
+    my $Is_Dir = (string)undef;
+    
+    my $topstat = (Sys::IO::Stat)undef;
+    if ($follow) {
+      eval { $topstat = Sys->stat($top_dir); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't stat $top_dir: $@";
+        }
+        return;
+      }
+    }
+    else {
+      eval { $topstat = Sys->lstat($top_dir); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't lstat $top_dir: $@";
+        }
+        return;
+      }
+    }
+    
+    # canonicalize directory separators
+    if (Sys::OS->is_windows) {
+      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
+      $top_dir = $_->[0];
+    }
+    
+    # no trailing / unless path is root
+    unless (&_is_root($top_dir)) {
+      Re->s(my $_ = [$top_dir], "/\z", "");
+      $top_dir = $_->[0];
+    }
+    
+    $Is_Dir= 0;
+    
+    if ($follow) {
+      if (&_is_absolute($top_dir)) {
+        $abs_dir = $top_dir;
+      }
+      elsif ($top_dir eq $self->{current_dir}) {
+        $abs_dir = $cwd;
+      }
+      else {  # care about any  ../
+        $abs_dir = $self->contract_name("$cwd/", $top_dir);
+      }
+      $abs_dir = $self->Follow_SymLink($abs_dir);
+      unless ($abs_dir) {
+        return;
+      }
+      
+      if ($topstat->d) {
+        $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
+        $Is_Dir= 1;
+      }
+    }
+    else { # no follow
+    
+      if ($topstat->d) {
+        $self->_find_dir($cb, $top_dir);
+        $Is_Dir = 1;
+      }
+      else {
+        $abs_dir = $top_dir;
+      }
+    }
+    
+    unless ($Is_Dir) {
+      my $_ = File::Basename->fileparse($abs_dir);
+      my $base_name = $_->[0];
+      my $dir = $_->[1];
+      
+      unless ($dir) {
+        $dir = "./";
+        $base_name = $top_dir;
+      }
+      
+      $abs_dir = $dir;
+      
+      my $name = $abs_dir . $base_name;
+      
+      my $info = File::Find::Info->new;
+      $info->{dir} = $dir;
+      $info->{name} = $name;
+      
+      $cb->($info);
+    }
+    
   }
   
   private method contract_name : string ($cdir : string, $fn : string) {
@@ -222,112 +324,6 @@ class File::Find {
     }
     
     return $AbsName;
-  }
-  
-  private method _find_opt : void ($cb : File::Find::Callback, $top_dir : string) {
-    
-    unless ($top_dir) {
-      die "invalid top directory" ;
-    }
-    
-    # This function must local()ize everything because callbacks may
-    # call find() or finddepth()
-    
-    my $cwd            = Cwd->getcwd();
-    my $full_check        = $self->full_check;
-    my $follow            = $self->follow_or_follow_fast;
-    my $follow_skip       = $self->{follow_skip};
-    my $warn = $self->{warn};
-    
-    my $abs_dir = (string)undef;
-    my $Is_Dir = (string)undef;
-    
-    my $topstat = (Sys::IO::Stat)undef;
-    if ($follow) {
-      eval { $topstat = Sys->stat($top_dir); }
-      if ($@) {
-        if ($warn) {
-          warn "Can't stat $top_dir: $@";
-        }
-        return;
-      }
-    }
-    else {
-      eval { $topstat = Sys->lstat($top_dir); }
-      if ($@) {
-        if ($warn) {
-          warn "Can't lstat $top_dir: $@";
-        }
-        return;
-      }
-    }
-    
-    # canonicalize directory separators
-    if (Sys::OS->is_windows) {
-      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
-      $top_dir = $_->[0];
-    }
-    
-    # no trailing / unless path is root
-    unless (&_is_root($top_dir)) {
-      Re->s(my $_ = [$top_dir], "/\z", "");
-      $top_dir = $_->[0];
-    }
-    
-    $Is_Dir= 0;
-    
-    if ($follow) {
-      if (&_is_absolute($top_dir)) {
-        $abs_dir = $top_dir;
-      }
-      elsif ($top_dir eq $self->{current_dir}) {
-        $abs_dir = $cwd;
-      }
-      else {  # care about any  ../
-        $abs_dir = $self->contract_name("$cwd/", $top_dir);
-      }
-      $abs_dir = $self->Follow_SymLink($abs_dir);
-      unless ($abs_dir) {
-        return;
-      }
-      
-      if ($topstat->d) {
-        $self->_find_dir_symlnk($cb, $abs_dir, $top_dir);
-        $Is_Dir= 1;
-      }
-    }
-    else { # no follow
-    
-      if ($topstat->d) {
-        $self->_find_dir($cb, $top_dir);
-        $Is_Dir = 1;
-      }
-      else {
-        $abs_dir = $top_dir;
-      }
-    }
-    
-    unless ($Is_Dir) {
-      my $_ = File::Basename->fileparse($abs_dir);
-      my $base_name = $_->[0];
-      my $dir = $_->[1];
-      
-      unless ($dir) {
-        $dir = "./";
-        $base_name = $top_dir;
-      }
-      
-      $abs_dir = $dir;
-      
-      my $name = $abs_dir . $base_name;
-      
-      my $info = File::Find::Info->new;
-      $info->{dir} = $dir;
-      $info->{name} = $name;
-      
-      $cb->($info);
-    }
-    
   }
   
   method _find_dir : void ($cb : File::Find::Callback, $parent_dir : string) {
