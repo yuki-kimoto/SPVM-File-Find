@@ -338,7 +338,7 @@ class File::Find {
     
     my $warn = $self->{warn};
     
-    my $dir_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
+    my $dir_name_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
     
     my $info = File::Find::Info->new;
     
@@ -355,7 +355,7 @@ class File::Find {
           $dir_rel = $SE->[1]->(string);
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
-          $dir_with_slash = "$dir_name/";
+          $dir_name_with_slash = "$dir_name/";
         }
         else {
           last;
@@ -398,13 +398,13 @@ class File::Find {
           next;
         }
         
-        my $sub_lstat = Sys->lstat($dir_with_slash . $file_name);
+        my $sub_lstat = Sys->lstat($dir_name_with_slash . $file_name);
         
         if ($sub_lstat->d) {
           $dirs_stack->push([(object)$dir_name, $file_name]);
         }
         else {
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{name} = $dir_name_with_slash . $file_name;
           $wanted_callback->($info);
         }
       }
@@ -420,7 +420,7 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $warn = $self->{warn};
     
-    my $dir_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
+    my $dir_name_with_slash = &_is_root($p_dir) ? $p_dir : "$p_dir/";
     my $loc_pref = &_is_root($dir_loc) ? $dir_loc : "$dir_loc/";
     
     my $info = File::Find::Info->new;
@@ -445,7 +445,7 @@ class File::Find {
           $p_dir = $SE->[2]->(string);
           
           $dir_name = &_is_root($p_dir) ? "$p_dir$dir_rel" : "$p_dir/$dir_rel";
-          $dir_with_slash = "$dir_name/";
+          $dir_name_with_slash = "$dir_name/";
           $loc_pref = "$dir_loc/";
           last;
         }
@@ -501,7 +501,7 @@ class File::Find {
         # ignore if invalid symlink
         unless ($new_loc) {
           $info->{fullname} = $loc_pref . $file_name;
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{name} = $dir_name_with_slash . $file_name;
           $wanted_callback->($info);
           next;
         }
@@ -511,7 +511,7 @@ class File::Find {
         }
         else {
           $info->{fullname} = $new_loc;
-          $info->{name} = $dir_with_slash . $file_name;
+          $info->{name} = $dir_name_with_slash . $file_name;
           $wanted_callback->($info);
         }
       }
