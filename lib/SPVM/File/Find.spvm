@@ -385,14 +385,7 @@ class File::Find {
       $info->{dir} = $dir_name;
       
       # Get the list of files in the current directory.
-      my $dh = (IO::Dir)undef;
-      eval { $dh = IO::Dir->new($dir_name); }
-      if ($@) {
-        if ($warn) {
-          warn "Can't opendir($dir_name): $@";
-        }
-        next;
-      }
+      my $dh = IO::Dir->new($dir_name);
       my $file_names_list = StringList->new;
       while (my $dirent = $dh->read) {
         $file_names_list->push($dirent->d_name);
@@ -482,15 +475,7 @@ class File::Find {
       $info->{dir} = $dir_name;
       
       # Get the list of files in the current directory.
-      my $dh = (IO::Dir)undef;
-      eval { $dh = IO::Dir->new($dir_loc); }
-      
-      if ($@) {
-        if ($warn) {
-          warn "Can't opendir($dir_loc): $@";
-        }
-        next;
-      }
+      my $dh = IO::Dir->new($dir_name);
       my $file_names_list = StringList->new;
       while (my $dirent = $dh->read) {
         $file_names_list->push($dirent->d_name);
