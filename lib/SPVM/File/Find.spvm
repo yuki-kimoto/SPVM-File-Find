@@ -399,9 +399,16 @@ class File::Find {
         
         my $info_name = $dir_with_slash . $file_name;
         
-        my $sub_lstat = Sys->lstat($info_name);
+        my $lstat = (Sys::IO::Stat)undef;
+        eval { $lstat = Sys->lstat($info_name); }
+        if ($@) {
+          if ($warn) {
+            warn "Can't lstat($info_name): $@";
+          }
+          next;
+        }
         
-        if ($sub_lstat->d) {
+        if ($lstat->d) {
           $dirs_stack->push([(object)$dir, $file_name]);
         }
         else {
