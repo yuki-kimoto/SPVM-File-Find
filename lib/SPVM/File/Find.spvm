@@ -105,10 +105,9 @@ class File::Find {
     my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $follow = $self->{follow};
     
-    my $parent_dir = $top_dir;
+    my $dir = $top_dir;
     
-    my $dir = $parent_dir;
-    my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
+    my $dir_with_slash = &_is_root($dir) ? $dir : "$dir/";
     
     my $cwd = Cwd->getcwd();
     my $fullname = (string)undef;
@@ -139,11 +138,11 @@ class File::Find {
           
           $SE = (object[])$dirs_stack->pop;
           
-          $parent_dir = $SE->[0]->(string);
+          $dir = $SE->[0]->(string);
           my $base_name = $SE->[1]->(string);
           my $fullname = $SE->[2]->(string);
           
-          $dir = &_is_root($parent_dir) ? "$parent_dir$base_name" : "$parent_dir/$base_name";
+          $dir = &_is_root($dir) ? "$dir$base_name" : "$dir/$base_name";
           $dir_with_slash = "$dir/";
           if ($follow_or_follow_fast) {
             $fullname_with_slash = "$fullname/";
@@ -157,7 +156,7 @@ class File::Find {
         $loop_started++;
       }
       
-      $info->{dir} = $parent_dir;
+      $info->{dir} = $dir;
       $info->{name} = $dir;
       $info->{fullname} = $fullname;
       $cb->($info);
