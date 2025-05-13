@@ -1,3 +1,7 @@
+0.028 2025-05-13
+  [Incompatible Changes]
+    * Remove bydepth option.
+    
 0.027 2025-05-10
   [Document Improvement]
     * Improve documents.

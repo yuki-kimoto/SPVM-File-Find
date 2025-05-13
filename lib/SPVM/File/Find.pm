@@ -49,14 +49,6 @@ Gets file names:
 
 =head1 Fields
 
-=head2 bydepth
-
-C<has bydepth : ro byte;>
-
-If this filed is a true value, L</"find"> method reports the name of a directory only AFTER all its entries have been reported.
-
-See L<File::Find/"bydepth"> option for details.
-
 =head2 preprocess
 
 C<has preprocess : ro L<File::Find::Callback::Preprocess|SPVM::File::Find::Callback::Preprocess>;>
@@ -134,12 +126,6 @@ Creates a new File::Find object given the options $options, and returns the new 
 Options:
 
 =over 2
-
-=item * bydepth
-
-C<bydepth : Int = 0>
-
-See L</"bydepth"> field for details.
 
 =item * preprocess
 

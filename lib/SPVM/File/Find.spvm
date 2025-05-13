@@ -24,8 +24,6 @@ class File::Find {
   use IO::Dir;
   
   # Fields
-  has bydepth : ro byte;
-  
   has preprocess : ro File::Find::Callback::Preprocess;
   
   has postprocess : ro File::Find::Callback;
@@ -57,7 +55,6 @@ class File::Find {
     my $self = new File::Find;
     
     my $option_names = [
-      "bydepth",
       "preprocess",
       "postprocess",
       "follow",
@@ -72,8 +69,6 @@ class File::Find {
     Fn->check_option_names($options, $option_names);
     
     my $options_h = Hash->new($options);
-    
-    $self->{bydepth} = (byte)$options_h->get_or_default_int("bydepth", 0);
     
     $self->{preprocess} = (File::Find::Callback::Preprocess)$options_h->get("preprocess");
     
@@ -271,7 +266,6 @@ class File::Find {
     # call find() or finddepth()
     
     my $cwd            = Cwd->getcwd();
-    my $bydepth           = $self->{bydepth};
     my $pre_process       = $self->{preprocess};
     my $post_process      = $self->{postprocess};
     my $no_chdir          = $self->{no_chdir};
@@ -403,7 +397,6 @@ class File::Find {
     my $dir_rel = $self->{current_dir};
     my $no_nlink = 0;
     my $no_chdir = $self->{no_chdir};
-    my $bydepth = $self->{bydepth};
     my $post_process = $self->{postprocess};
     my $pre_process = $self->{preprocess};
     my $avoid_nlink = $self->avoid_nlink;
@@ -426,10 +419,6 @@ class File::Find {
       }
     }
     
-    # push the starting directory
-    if ($bydepth) {
-      $Stack->push([(object)$CdLvl, $p_dir, $dir_rel, -1]);
-    }
     my $loop_started = 0;
     
     while (1) {
@@ -475,12 +464,9 @@ class File::Find {
               $info->{_} = $_->[0];
             }
             $wanted_callback->($info);
-           }
-           else {
-             if ($bydepth) {
-               $Stack->push([(object)$CdLvl, $p_dir, $dir_rel, -1]);
-               last;
-             }
+          }
+          else {
+            last;
           }
         }
         
@@ -493,7 +479,7 @@ class File::Find {
         $loop_started++;
       }
       
-      unless ($bydepth) {
+      {
         $info->{dir} = $p_dir;
         $info->{name} = $dir_name;
         $info->{_} = ($no_chdir ? $dir_name : $dir_rel );
@@ -613,7 +599,6 @@ class File::Find {
     my $byd_flag = 0; # flag for pending stack entry if $bydepth
     my $warn = $self->{warn};
     my $no_chdir = $self->{no_chdir};
-    my $bydepth = $self->{bydepth};
     my $post_process = $self->{postprocess};
     my $pre_process = $self->{preprocess};
     my $avoid_nlink = $self->avoid_nlink;    
@@ -635,10 +620,6 @@ class File::Find {
           return;
         }
       }
-    }
-    
-    if ($bydepth) {
-      $Stack->push([(object)$dir_loc, $updir_loc, $p_dir, $dir_rel, -1]);
     }
     
     my $lstat = (Sys::IO::Stat)undef;
@@ -692,9 +673,6 @@ class File::Find {
             $wanted_callback->($info);
           }
           else {
-            if ($bydepth) {
-              $Stack->push([(object)$dir_loc, $updir_loc, $p_dir, $dir_rel, -1]);
-            }
             last;
           }
         }
@@ -708,7 +686,7 @@ class File::Find {
         $loop_started++;
       }
       
-      unless ($bydepth) {
+      {
         # change (back) to parent directory (always untainted)
         unless ($no_chdir) {
           eval { Sys->chdir($updir_loc); }
