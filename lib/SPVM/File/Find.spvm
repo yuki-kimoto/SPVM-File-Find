@@ -80,6 +80,20 @@ class File::Find {
   # Instance Methods
   method find : void ($cb : File::Find::Callback, $top_dir : string) {
     
+    my $follow_or_follow_fast = $self->follow_or_follow_fast;
+    if ($follow_or_follow_fast) {
+      $self->_find_dir_symlnk($cb, $top_dir);
+    }
+    else {
+      $self->_find_dir($cb, $top_dir);
+    }
+  }
+  
+  method _find_dir : void ($cb : File::Find::Callback, $top_dir : string) {
+    
+    my $follow_or_follow_fast = $self->follow_or_follow_fast;
+    my $follow = $self->{follow};
+    
     unless ($top_dir) {
       die "invalid top directory" ;
     }
@@ -96,7 +110,6 @@ class File::Find {
       $top_dir = $_->[0];
     }
     
-    my $follow_or_follow_fast = $self->follow_or_follow_fast;
     my $warn = $self->{warn};
     
     my $topstat = (Sys::IO::Stat)undef;
@@ -123,13 +136,11 @@ class File::Find {
     my $abs_dir = (string)undef;
     if ($follow_or_follow_fast) {
       if ($topstat->d) {
-        $self->_find_dir_symlnk($cb, $top_dir);
         $is_dir= 1;
       }
     }
     else { # no follow
       if ($topstat->d) {
-        $self->_find_dir($cb, $top_dir);
         $is_dir = 1;
       }
     }
@@ -138,17 +149,10 @@ class File::Find {
       die "The top directory \$top_dir must be a directory.";
     }
     
-  }
-  
-  method _find_dir : void ($cb : File::Find::Callback, $parent_dir : string) {
-    
-    my $follow_or_follow_fast = $self->follow_or_follow_fast;
-    my $follow = $self->{follow};
+    my $parent_dir = $top_dir;
     
     my $dir = $parent_dir;
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
-    
-    my $warn = $self->{warn};
     
     my $dirs_stack = List->new;
     my $loop_started = 0;
@@ -229,6 +233,66 @@ class File::Find {
   
   method _find_dir_symlnk : void ($cb : File::Find::Callback, $top_dir : string) {
     
+    my $follow_or_follow_fast = $self->follow_or_follow_fast;
+    my $follow = $self->{follow};
+    
+    unless ($top_dir) {
+      die "invalid top directory" ;
+    }
+    
+    # canonicalize directory separators
+    if (Sys::OS->is_windows) {
+      Re->s(my $_ = [$top_dir], ["[/\\\\]", "g"], "/");
+      $top_dir = $_->[0];
+    }
+    
+    # no trailing / unless path is root
+    unless (&_is_root($top_dir)) {
+      Re->s(my $_ = [$top_dir], "/\z", "");
+      $top_dir = $_->[0];
+    }
+    
+    my $warn = $self->{warn};
+    
+    my $topstat = (Sys::IO::Stat)undef;
+    if ($follow_or_follow_fast) {
+      eval { $topstat = Sys->stat($top_dir); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't stat $top_dir: $@";
+        }
+        return;
+      }
+    }
+    else {
+      eval { $topstat = Sys->lstat($top_dir); }
+      if ($@) {
+        if ($warn) {
+          warn "Can't lstat $top_dir: $@";
+        }
+        return;
+      }
+    }
+    
+    my $is_dir = 0;
+    my $abs_dir = (string)undef;
+    if ($follow_or_follow_fast) {
+      if ($topstat->d) {
+        $is_dir= 1;
+      }
+    }
+    else { # no follow
+      if ($topstat->d) {
+        $is_dir = 1;
+      }
+    }
+    
+    unless ($is_dir) {
+      die "The top directory \$top_dir must be a directory.";
+    }
+    
+    my $parent_dir = $top_dir;
+    
     my $cwd = Cwd->getcwd();
     my $fullname = (string)undef;
     if (&_is_absolute($top_dir)) {
@@ -242,14 +306,11 @@ class File::Find {
     }
     $fullname = $self->Follow_SymLink($fullname);
     
-    my $parent_dir = $top_dir;
-    
     my $dirs_stack = List->new;
     my $new_fullname = (string)undef;
     my $SE = (object[])undef;
     my $dir = $parent_dir;
     my $dir_rel = $self->{current_dir};
-    my $warn = $self->{warn};
     
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
     my $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
