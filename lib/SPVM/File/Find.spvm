@@ -28,8 +28,6 @@ class File::Find {
   
   has follow_skip : ro byte;
   
-  has no_chdir : ro byte;
-  
   has warn : ro byte;
   
   # Undocumented Fields
@@ -48,7 +46,6 @@ class File::Find {
       "follow",
       "follow_fast",
       "follow_skip",
-      "no_chdir",
       "warn",
     ];
     

@@ -71,19 +71,11 @@ C<has follow_skip : ro byte;>
 
 See L<File::Find/"follow_skip"> option for details.
 
-=head2 no_chdir
-
-C<has no_chdir : ro byte;>
-
-Does not C<chdir()> to each directory as it recurses.
-
-See L<File::Find/"no_chdir"> option for details.
-
 =head2 warn
 
 C<has warn : ro byte;>
 
-If the value of this field is a true value and a system call such as C<chdir> fails, prints a warning message to stderr.
+If the value of this field is a true value and a system call fails, prints a warning message to stderr.
 
 =head1 Class Methods
 
@@ -116,12 +108,6 @@ C<follow_skip : Int = 0>
 If C<follow> or C<follow_fast> option is a true value and this option is not specified, the value is set to 1, otherwise set to 0.
 
 Set L</"follow_skip"> field to this value.
-
-=item * no_chdir
-
-C<no_chdir : Int = 0>
-
-Set L</"no_chdir"> field to this value.
 
 =item * warn
 
