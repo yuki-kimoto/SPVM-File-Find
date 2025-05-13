@@ -238,7 +238,7 @@ class File::Find {
     }
   }
   
-  method _find_dir_symlnk : void ($cb : File::Find::Callback, $dir_loc : string, $parent_dir : string) {
+  method _find_dir_symlnk : void ($cb : File::Find::Callback, $fullname : string, $parent_dir : string) {
     my $dirs_stack = List->new;
     my $new_loc = (string)undef;
     my $SE = (object[])undef;
@@ -247,7 +247,7 @@ class File::Find {
     my $warn = $self->{warn};
     
     my $dir_with_slash = &_is_root($parent_dir) ? $parent_dir : "$parent_dir/";
-    my $loc_pref = &_is_root($dir_loc) ? $dir_loc : "$dir_loc/";
+    my $fullname_with_slash = &_is_root($fullname) ? $fullname : "$fullname/";
     
     my $info = File::Find::Info->new;
     
@@ -266,12 +266,12 @@ class File::Find {
           
           $SE = (object[])$dirs_stack->pop;
           
-          $dir_loc = $SE->[0]->(string);
+          $fullname = $SE->[0]->(string);
           $parent_dir = $SE->[1]->(string);
           
           $dir = &_is_root($parent_dir) ? "$parent_dir$dir_rel" : "$parent_dir/$dir_rel";
           $dir_with_slash = "$dir/";
-          $loc_pref = "$dir_loc/";
+          $fullname_with_slash = "$fullname/";
           last;
         }
         
@@ -287,7 +287,7 @@ class File::Find {
       {
         $info->{dir} = $parent_dir;
         $info->{name} = $dir;
-        $info->{fullname} = $dir_loc;
+        $info->{fullname} = $fullname;
         # prune may happen here
         $info->{prune} = 0;
         $cb->($info);
@@ -300,11 +300,11 @@ class File::Find {
       
       # Get the list of files in the current directory.
       my $dh = (IO::Dir)undef;
-      eval { $dh = IO::Dir->new($dir_loc); }
+      eval { $dh = IO::Dir->new($fullname); }
       
       if ($@) {
         if ($warn) {
-          warn "Can't opendir($dir_loc): $@";
+          warn "Can't opendir($fullname): $@";
         }
         next;
       }
@@ -321,11 +321,11 @@ class File::Find {
         }
         
         # follow symbolic links / do an lstat
-        $new_loc = $self->Follow_SymLink($loc_pref . $base_name);
+        $new_loc = $self->Follow_SymLink($fullname_with_slash . $base_name);
 
         # ignore if invalid symlink
         unless ($new_loc) {
-          $info->{fullname} = $loc_pref . $base_name;
+          $info->{fullname} = $fullname_with_slash . $base_name;
           $info->{name} = $dir_with_slash . $base_name;
           $cb->($info);
           next;
