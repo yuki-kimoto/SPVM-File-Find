@@ -2,7 +2,7 @@
 # MIT License
 
 class File::Find {
-  version "0.027";
+  version "0.028";
   
   use File::Find::Info;
   use File::Find::Callback;
