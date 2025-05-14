@@ -31,6 +31,8 @@ class File::Find {
   # Undocumented Fields
   has SLnkSeen : Hash of Int;
   
+  has file_seen_h : Hash of Int;
+  
   has current_dir : string;
   
   has skip_pattern : string;
@@ -62,6 +64,8 @@ class File::Find {
     }
     
     $self->{SLnkSeen} = Hash->new;
+    
+    $self->{file_seen_h} = Hash->new;
     
     $self->{current_dir} = File::Spec->curdir // ".";
     
@@ -98,6 +102,7 @@ class File::Find {
     
     my $warn = $self->{warn};
     my $follow = $self->{follow};
+    my $file_seen_h = $self->{file_seen_h};
     
     my $tree_queue = StringList->new;
     
@@ -124,8 +129,6 @@ class File::Find {
       
       my $dir = $name;
       
-      my $open_dir = 0;
-      
       my $lstat = (Sys::IO::Stat)undef;
       
       eval { $lstat = Sys->lstat($dir); }
@@ -136,6 +139,15 @@ class File::Find {
         }
         next;
       }
+      
+      my $dev = $lstat->st_dev;
+      my $ino = $lstat->st_ino;
+      my $dev_resolved = -1L;;
+      my $ino_resolved = -1L;
+      
+      $file_seen_h->set("$dev/$ino", 1);
+      
+      my $is_dir = 0;
       
       if ($lstat->l) {
         if ($follow) {
@@ -150,18 +162,25 @@ class File::Find {
             next;
           }
           
+          $dev_resolved = $stat->st_dev;
+          $ino_resolved = $stat->st_ino;
+          
+          $file_seen_h->set("$dev_resolved/$ino_resolved", 1);
+          
           if ($stat->d) {
-            $open_dir = 1;
+            $is_dir = 1;
           }
         }
       }
       else {
         if ($lstat->d) {
-          $open_dir = 1;
+          $is_dir = 1;
         }
+        $dev_resolved = $dev;
+        $ino_resolved = $ino;
       }
       
-      unless ($open_dir) {
+      unless ($is_dir) {
         next;
       }
       
