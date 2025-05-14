@@ -102,17 +102,6 @@ class File::Find {
       
       my $dir = $name;
       
-      my $lstat = (Sys::IO::Stat)undef;
-      
-      eval { $lstat = Sys->lstat($dir); }
-      
-      if ($@) {
-        if ($warn) {
-          warn "Sys#lstat method failed. File:$dir, Error:$@";
-        }
-        next;
-      }
-      
       if (Sys->l($dir)) {
         unless ($follow) {
           next;
