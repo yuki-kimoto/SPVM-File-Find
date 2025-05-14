@@ -153,7 +153,7 @@ class File::Find {
         my $file_id = "$dev/$ino";
         if ($file_seen_h->exists($file_id)) {
           if ($warn) {
-            warn "The directory $dir has already been processed.";
+            warn "The directory $dir has already been processed. st_dev:$dev, st_ino:$ino";
           }
           next;
         }
