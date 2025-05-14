@@ -15,8 +15,6 @@ class TestCase::File::Find {
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
-        my $dir = $info->dir;
-        
         my $name = $info->name;
         
         $self->{files_list}->push($name);
@@ -53,8 +51,6 @@ class TestCase::File::Find {
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
-        my $dir = $info->dir;
-        
         my $name = $info->name;
         
         $self->{files_list}->push($name);
@@ -90,8 +86,6 @@ class TestCase::File::Find {
       my $files_list = StringList->new;
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $dir = $info->dir;
         
         my $name = $info->name;
         
@@ -131,8 +125,6 @@ class TestCase::File::Find {
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
-        my $dir = $info->dir;
-        
         my $name = $info->name;
         
         $self->{files_list}->push($name);
@@ -170,8 +162,6 @@ class TestCase::File::Find {
       my $files_list = StringList->new;
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $dir = $info->dir;
         
         my $name = $info->name;
         
@@ -212,8 +202,6 @@ class TestCase::File::Find {
       my $files_list = StringList->new;
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $dir = $info->dir;
         
         my $name = $info->name;
         

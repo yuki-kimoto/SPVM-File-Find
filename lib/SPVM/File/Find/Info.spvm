@@ -15,8 +15,6 @@ class File::Find::Info {
   }
   
   # Fields
-  has dir : ro string;
-  
   has name : ro string;
   
   has prune : rw byte;

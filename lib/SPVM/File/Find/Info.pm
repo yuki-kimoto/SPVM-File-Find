@@ -16,21 +16,11 @@ File::Find::Info class in L<SPVM> has methods to get and set information about a
 
   File::Find->new->find(method : void ($info : File::Find::Info) {
     
-    my $dir = $info->dir;
-    
     my $file_name = $info->name;
     
   }, $top_dir);
 
 =head1 Fields
-
-=head2 dir
-
-C<has dir : ro string;>
-
-The current directory name.
-
-See C<$File::Find::dir> in L<File::Find wanted function|File::Find/"wanted"> for details.
 
 =head2 name
 

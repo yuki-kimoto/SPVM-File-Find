@@ -11,6 +11,7 @@
     * Remove File::Find::Info#prune field.
     * Remove follow_fast option.
     * Remove File::Find::Info#fullname field.
+    * Remove File::Find::Info#dir field.
 0.027 2025-05-10
   [Document Improvement]
     * Improve documents.

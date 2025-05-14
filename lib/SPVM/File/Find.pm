@@ -24,8 +24,6 @@ Many tests are not written yet. This class has many bugs.
   
   File::Find->new->find(method : void ($info : File::Find::Info) {
     
-    my $dir = $info->dir;
-    
     my $file_name = $info->name;
     
   }, $top_dir);

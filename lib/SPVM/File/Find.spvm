@@ -130,7 +130,6 @@ class File::Find {
         $name = $dir_with_slash . $base_name;
       }
       
-      $info->{dir} = $dir;
       $info->{name} = $name;
       
       $cb->($info);
