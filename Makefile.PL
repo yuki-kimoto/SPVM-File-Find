@@ -52,6 +52,7 @@ WriteMakefile(
     'SPVM::IO' => '0.236',
   },
   TEST_REQUIRES => {
+    'SPVM::File::Spec' => '0.087',
   },
 );
 
