@@ -59,7 +59,7 @@ See L<File::Find/"follow"> option for details.
 
 C<has warn : ro byte;>
 
-If the value of this field is a true value and a system call fails, prints a warning message to stderr.
+If the value of this field is a true value and a system call such as C<stat>, C<lstat>, C<opendir> fails or infinite loops are detected, prints a warning message to stderr.
 
 =head1 Class Methods
 
@@ -94,6 +94,10 @@ Set L</"warn"> field to this value.
 C<method find : void ($cb : L<File::Find::Callback|SPVM::File::Find::Callback>, $dir : string);>
 
 Iterates each file recursively under the $dir and calls the callback $cb by the file.
+
+Note:
+
+If a symbolic link points to a directory that has already been processed, the files within that directory are skipped to prevent infinite loops.
 
 =head1 See Also
 
