@@ -99,7 +99,7 @@ class File::Find {
     my $warn = $self->{warn};
     my $follow = $self->{follow};
     
-    my $tree_queue = List->new;
+    my $tree_queue = StringList->new;
     
     my $base_name = (string)undef;
     
@@ -107,7 +107,7 @@ class File::Find {
     
     my $name = $top_dir;
     
-    $tree_queue->push([(object)$top_dir, $base_name, $is_top_dir, $name]);
+    $tree_queue->push($name);
     
     while (1) {
       
@@ -115,9 +115,7 @@ class File::Find {
         last;
       }
       
-      my $tree_info = (object[])$tree_queue->shift;
-      
-      my $name = $tree_info->[3]->(string);
+      my $name = $tree_queue->shift;
       
       my $info = File::Find::Info->new;
       $info->{name} = $name;
@@ -162,7 +160,7 @@ class File::Find {
         
         my $name = &_is_root($dir) ? "$dir$base_name" : "$dir/$base_name";
         
-        $tree_queue->push([(object)$dir, $base_name, 0, $name]);
+        $tree_queue->push($name);
       }
     }
   }
