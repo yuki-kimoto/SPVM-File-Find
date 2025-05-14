@@ -49,8 +49,6 @@ WriteMakefile(
     %configure_and_runtime_requires,
     'SPVM::Sys' => '0.509',
     'SPVM::Regex' => '0.246',
-    'SPVM::File::Basename' => '0.02',
-    'SPVM::File::Spec' => '0.087',
     'SPVM::IO' => '0.236',
   },
   TEST_REQUIRES => {
