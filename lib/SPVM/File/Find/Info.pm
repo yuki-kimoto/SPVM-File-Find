@@ -40,14 +40,6 @@ The complete pathname to the file.
 
 See C<$File::Find::name> in L<File::Find wanted function|File::Find/"wanted"> for details.
 
-=head2 fullname
-
-C<has fullname : ro string;>
-
-The absolute pathname of the file with all symbolic links resolved.
-
-See C<$File::Find::fullname> in L<File::Find wanted function|File::Find/"wanted"> for details.
-
 =head2 prune
 
 C<has prune : rw byte;>

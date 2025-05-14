@@ -132,34 +132,6 @@ class File::Find {
       
       $info->{dir} = $dir;
       $info->{name} = $name;
-      if ($follow) {
-        my $dir_for_fullname = (string)undef;
-        if ($is_top_dir) {
-          my $cwd = Cwd->getcwd();
-          my $fullname = (string)undef;
-          my $fullname_with_slash = (string)undef;
-          if (&_is_absolute($dir)) {
-            $dir_for_fullname = $dir;
-          }
-          elsif ($dir eq $self->{current_dir}) {
-            $dir_for_fullname = $cwd;
-          }
-          else {  # care about any  ../
-            $dir_for_fullname = $self->_contract_name("$cwd/", $dir);
-          }
-        }
-        else {
-          $dir_for_fullname = $dir;
-        }
-        
-        my $dir_for_fullname_with_slash = &_is_root($dir_for_fullname) ? $dir_for_fullname : "$dir_for_fullname/";
-        my $name_for_fullname = $dir_for_fullname_with_slash . $base_name;
-        
-        if (Sys->l($name_for_fullname)) {
-          my $fullname = $self->_Follow_SymLink($name_for_fullname);
-          $info->{fullname} = $fullname;
-        }
-      }
       
       $cb->($info);
       
