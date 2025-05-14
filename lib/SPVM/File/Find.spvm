@@ -105,7 +105,9 @@ class File::Find {
     
     my $is_top_dir = 1;
     
-    $tree_queue->push([(object)$top_dir, $base_name, $is_top_dir]);
+    my $name = $top_dir;
+    
+    $tree_queue->push([(object)$top_dir, $base_name, $is_top_dir, $name]);
     
     while (1) {
       
@@ -170,7 +172,9 @@ class File::Find {
           next;
         }
         
-        $tree_queue->push([(object)$dir, $base_name, 0]);
+        my $name = &_is_root($dir) ? "$dir$base_name" : "$dir/$base_name";
+        
+        $tree_queue->push([(object)$dir, $base_name, 0, $name]);
       }
     }
   }
