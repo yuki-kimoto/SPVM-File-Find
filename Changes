@@ -12,6 +12,7 @@
     * Remove follow_fast option.
     * Remove File::Find::Info#fullname field.
     * Remove File::Find::Info#dir field.
+    * Remove follow_skip option.
 0.027 2025-05-10
   [Document Improvement]
     * Improve documents.
