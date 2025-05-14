@@ -58,9 +58,11 @@ class File::Find {
       $self->{follow_skip} = (byte)$options_h->get_int("follow_skip");
     }
     else {
-      if ($self->{follow}) {
-        $self->{follow_skip} = 1;
-      }
+      $self->{follow_skip} = 1;
+    }
+    
+    unless ($self->{follow_skip} == 1 || $self->{follow_skip} == 2) {
+      die "The value of follow_skip option must be 1 or 2.";
     }
     
     $self->{SLnkSeen} = Hash->new;
@@ -103,6 +105,7 @@ class File::Find {
     my $warn = $self->{warn};
     my $follow = $self->{follow};
     my $file_seen_h = $self->{file_seen_h};
+    my $follow_skip = $self->{follow_skip};
     
     my $tree_queue = StringList->new;
     
@@ -142,10 +145,6 @@ class File::Find {
       
       my $dev = $lstat->st_dev;
       my $ino = $lstat->st_ino;
-      my $dev_resolved = -1L;;
-      my $ino_resolved = -1L;
-      
-      $file_seen_h->set("$dev/$ino", 1);
       
       my $is_dir = 0;
       
@@ -162,10 +161,8 @@ class File::Find {
             next;
           }
           
-          $dev_resolved = $stat->st_dev;
-          $ino_resolved = $stat->st_ino;
-          
-          $file_seen_h->set("$dev_resolved/$ino_resolved", 1);
+          $dev = $stat->st_dev;
+          $ino = $stat->st_ino;
           
           if ($stat->d) {
             $is_dir = 1;
@@ -176,12 +173,33 @@ class File::Find {
         if ($lstat->d) {
           $is_dir = 1;
         }
-        $dev_resolved = $dev;
-        $ino_resolved = $ino;
       }
       
       unless ($is_dir) {
         next;
+      }
+      
+      if ($follow) {
+        if ($follow_skip == 1 || $follow_skip == 2) {
+          my $file_id = "$dev/$ino";
+          if ($file_seen_h->exists($file_id)) {
+            if ($follow_skip == 1) {
+              die "The directory $dir has already been processed.";
+            }
+            elsif ($follow_skip == 2) {
+              next;
+            }
+            else {
+              die "[Unexpected Error]Invalid follow_skip value.";
+            }
+          }
+          else {
+            $file_seen_h->set($file_id, 1);
+          }
+        }
+        else {
+          die "[Unexpected Error]Invalid follow_skip value.";
+        }
       }
       
       # Get the list of files in the current directory.
