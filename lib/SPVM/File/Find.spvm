@@ -133,10 +133,10 @@ class File::Find {
         next;
       }
       
-      my $dev = $stat->st_dev;
-      my $ino = $stat->st_ino;
-      
       if ($follow) {
+        my $dev = $stat->st_dev;
+        my $ino = $stat->st_ino;
+        
         my $file_id = "$dev/$ino";
         if ($file_seen_h->exists($file_id)) {
           if ($warn) {
