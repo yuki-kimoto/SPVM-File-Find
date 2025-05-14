@@ -13,7 +13,7 @@ class TestCase::File::Find {
       
       my $files_list = StringList->new;
       
-      File::Find->new({follow => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
         
         my $name = $info->name;
         
