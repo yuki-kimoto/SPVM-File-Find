@@ -113,41 +113,28 @@ class File::Find {
         next;
       }
       
-      my $dev = $lstat->st_dev;
-      my $ino = $lstat->st_ino;
-      
-      my $is_dir = 0;
-      
-      if ($lstat->l) {
-        if ($follow) {
-          my $stat = (Sys::IO::Stat)undef;
-          
-          eval { $stat = Sys->stat($dir); }
-          
-          if ($@) {
-            if ($warn) {
-              warn "Sys#stat method failed. File:$dir, Error:$@";
-            }
-            next;
-          }
-          
-          $dev = $stat->st_dev;
-          $ino = $stat->st_ino;
-          
-          if ($stat->d) {
-            $is_dir = 1;
-          }
-        }
-      }
-      else {
-        if ($lstat->d) {
-          $is_dir = 1;
+      if (Sys->l($dir)) {
+        unless ($follow) {
+          next;
         }
       }
       
-      unless ($is_dir) {
+      my $stat = (Sys::IO::Stat)undef;
+      eval { $stat = Sys->stat($dir); }
+      
+      if ($@) {
+        if ($warn) {
+          warn "Sys#stat method failed. File:$dir, Error:$@";
+        }
         next;
       }
+      
+      unless ($stat->d) {
+        next;
+      }
+      
+      my $dev = $stat->st_dev;
+      my $ino = $stat->st_ino;
       
       if ($follow) {
         my $file_id = "$dev/$ino";
