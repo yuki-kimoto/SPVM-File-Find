@@ -125,15 +125,38 @@ class File::Find {
       my $dir = $name;
       
       my $open_dir = 0;
-      if (Sys->l($dir)) {
+      
+      my $lstat = (Sys::IO::Stat)undef;
+      
+      eval { $lstat = Sys->lstat($dir); }
+      
+      if ($@) {
+        if ($warn) {
+          warn "Sys#lstat method failed. File:$dir, Error:$@";
+        }
+        next;
+      }
+      
+      if ($lstat->l) {
         if ($follow) {
-          if (Sys->d($dir)) {
+          my $stat = (Sys::IO::Stat)undef;
+          
+          eval { $stat = Sys->stat($dir); }
+          
+          if ($@) {
+            if ($warn) {
+              warn "Sys#stat method failed. File:$dir, Error:$@";
+            }
+            next;
+          }
+          
+          if ($stat->d) {
             $open_dir = 1;
           }
         }
       }
       else {
-        if (Sys->d($dir)) {
+        if ($lstat->d) {
           $open_dir = 1;
         }
       }
@@ -147,10 +170,11 @@ class File::Find {
       eval { $dh = IO::Dir->new($dir); }
       if ($@) {
         if ($warn) {
-          warn "Can't opendir($dir): $@";
+          warn "IO::Dir#new method failed. Directory:$dir, Error:$@";
         }
         next;
       }
+      
       while (my $dirent = $dh->read) {
         my $base_name = $dirent->d_name;
         
