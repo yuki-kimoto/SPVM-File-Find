@@ -117,26 +117,14 @@ class File::Find {
       
       my $tree_info = (object[])$tree_queue->shift;
       
+      my $name = $tree_info->[3]->(string);
+      
       my $info = File::Find::Info->new;
-      
-      my $dir = $tree_info->[0]->(string);
-      my $base_name = $tree_info->[1]->(string);
-      my $is_top_dir = $tree_info->[2]->(int);
-      
-      my $name = (string)undef;
-      if ($is_top_dir) {
-        $name = $dir;
-      }
-      else {
-        my $dir_with_slash = &_is_root($dir) ? $dir : "$dir/";
-        $name = $dir_with_slash . $base_name;
-      }
-      
       $info->{name} = $name;
       
       $cb->($info);
       
-      $dir = $name;
+      my $dir = $name;
       
       my $open_dir = 0;
       if (Sys->l($dir)) {
