@@ -102,20 +102,33 @@ class File::Find {
       
       my $dir = $name;
       
-      if (Sys->l($dir)) {
-        unless ($follow) {
-          next;
-        }
-      }
-      
-      my $stat = (Sys::IO::Stat)undef;
-      eval { $stat = Sys->stat($dir); }
+      my $lstat = (Sys::IO::Stat)undef;
+      eval { $lstat = Sys->lstat($dir); }
       
       if ($@) {
         if ($warn) {
-          warn "Sys#stat method failed. File:$dir, Error:$@";
+          warn "Sys#lstat method failed. File:$dir, Error:$@";
         }
         next;
+      }
+      
+      my $stat = (Sys::IO::Stat)undef;
+      if ($lstat->l) {
+        unless ($follow) {
+          next;
+        }
+        
+        eval { $stat = Sys->stat($dir); }
+        
+        if ($@) {
+          if ($warn) {
+            warn "Sys#stat method failed. File:$dir, Error:$@";
+          }
+          next;
+        }
+      }
+      else {
+        $stat = $lstat;
       }
       
       unless ($stat->d) {
