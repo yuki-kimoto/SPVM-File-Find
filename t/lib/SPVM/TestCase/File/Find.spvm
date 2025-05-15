@@ -83,6 +83,45 @@ class TestCase::File::Find {
       }
     }
     
+    # trailing slash
+    {
+      my $dir = "t/test_files/";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+        if (Fn->contains($name, "dir2")) {
+          $info->set_prune(1);
+        }
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/test_files",
+        "t/test_files/dir1",
+        "t/test_files/dir1/dir1",
+        "t/test_files/dir1/dir1/file1.txt",
+        "t/test_files/dir1/dir1/file2.txt",
+        "t/test_files/dir1/file1.txt",
+        "t/test_files/dir1/file2.txt",
+        "t/test_files/dir2",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
     {
       my $dir = "t/test_files";
       
