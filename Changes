@@ -1,6 +1,8 @@
 0.028 2025-05-14
   [Requirement Changes]
     * Require SPVM::Sys 0.533.
+  [Bug Fix]
+    * Fix a bug that prune field does not work well.
 0.028 2025-05-14
   [Incompatible Changes]
     * Remove bydepth option.

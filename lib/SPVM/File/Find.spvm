@@ -101,6 +101,10 @@ class File::Find {
       
       $cb->($info);
       
+      if ($info->{prune}) {
+        next;
+      }
+      
       my $dir = $name;
       
       my $lstat = (Sys::IO::Stat)undef;
