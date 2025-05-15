@@ -87,6 +87,7 @@ class File::Find {
     
     $tree_queue->push($name);
     
+    my $info = File::Find::Info->new;
     while (1) {
       
       unless ($tree_queue->length > 0) {
@@ -95,8 +96,8 @@ class File::Find {
       
       my $name = $tree_queue->shift;
       
-      my $info = File::Find::Info->new;
       $info->{name} = $name;
+      $info->{prune} = 0;
       
       $cb->($info);
       
