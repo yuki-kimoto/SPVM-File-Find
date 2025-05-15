@@ -25,3 +25,15 @@ t/test_files/dir1/file1.txt
 t/test_files/dir1/file2.txt
 t/test_files/dir2/file1.txt
 t/test_files/dir2/file2.txt
+t/test_files2/dir1/dir1/file1.txt
+t/test_files2/dir1/dir1/file2.txt
+t/test_files2/dir1/file1.txt
+t/test_files2/dir1/file2.txt
+t/test_files2/dir2/file1.txt
+t/test_files2/dir2/file2.txt
+t/test_files2_link/dir1/dir1/file1.txt
+t/test_files2_link/dir1/dir1/file2.txt
+t/test_files2_link/dir1/file1.txt
+t/test_files2_link/dir1/file2.txt
+t/test_files2_link/dir2/file1.txt
+t/test_files2_link/dir2/file2.txt

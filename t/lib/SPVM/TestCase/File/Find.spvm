@@ -9,6 +9,69 @@ class TestCase::File::Find {
   static method test : int () {
 
     {
+      my $dir = "t/test_files2_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/test_files2_link",
+        "t/test_files2_link/dir1",
+        "t/test_files2_link/dir1/dir1",
+        "t/test_files2_link/dir1/dir1/file1.txt",
+        "t/test_files2_link/dir1/dir1/file2.txt",
+        "t/test_files2_link/dir1/file1.txt",
+        "t/test_files2_link/dir1/file2.txt",
+        "t/test_files2_link/dir2",
+        "t/test_files2_link/dir2/file1.txt",
+        "t/test_files2_link/dir2/file2.txt",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
+      my $dir = "t/test_files2_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/test_files2_link",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
       my $dir = "t/test_files";
       
       my $files_list = StringList->new;
@@ -83,7 +146,37 @@ class TestCase::File::Find {
       }
     }
     
-    # trailing slash
+    # root
+    {
+      my $dir = "/";
+      
+      my $files_list = StringList->new;
+      
+      my $count_ref = [0];
+      File::Find->new->find([has files_list : StringList = $files_list, $count_ref : int[]] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+        $count_ref->[0]++;
+        
+        if ($count_ref->[0] > 1) {
+          $info->set_prune(1);
+        }
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      unless (@$files > 1) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    # root
     {
       my $dir = "/";
       
