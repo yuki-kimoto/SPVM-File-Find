@@ -8,8 +8,6 @@ class TestCase::File::Find {
   
   static method test : int () {
 
-=pod TODO in Windows
-
     {
       my $dir = "t/test_files";
       
@@ -45,9 +43,7 @@ class TestCase::File::Find {
         return 0;
       }
     }
-
-=cut
-
+    
     {
       my $dir = "t/test_files";
       
