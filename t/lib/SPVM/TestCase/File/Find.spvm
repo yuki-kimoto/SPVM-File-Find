@@ -47,6 +47,9 @@ class TestCase::File::Find {
     {
       my $dir = "t/test_files2_link";
       
+      warn "[Test Output]Sys->l(\"$dir\"):" . Sys->l($dir);
+      warn "[Test Output]Sys->lstat(\"$dir\")->l:" . Sys->lstat($dir)->l;
+      
       my $files_list = StringList->new;
       
       File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
