@@ -85,6 +85,36 @@ class TestCase::File::Find {
     
     # trailing slash
     {
+      my $dir = "/";
+      
+      my $files_list = StringList->new;
+      
+      my $count_ref = [0];
+      File::Find->new->find([has files_list : StringList = $files_list, $count_ref : int[]] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+        $info->set_prune(1);
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "/",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    # trailing slash
+    {
       my $dir = "t/test_files/";
       
       my $files_list = StringList->new;
