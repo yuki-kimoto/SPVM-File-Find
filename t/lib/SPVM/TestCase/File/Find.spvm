@@ -63,7 +63,7 @@ class TestCase::File::Find {
     return 1;
   }
   
-  static method test : int () {
+  static method find : int () {
     {
       my $dir = "t/.tmp/test_files3_link";
       
