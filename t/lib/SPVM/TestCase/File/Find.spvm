@@ -63,7 +63,7 @@ class TestCase::File::Find {
     return 1;
   }
   
-  static method find : int () {
+  static method find_follow : int () {
     {
       my $dir = "t/.tmp/test_files3_link";
       
@@ -200,6 +200,11 @@ class TestCase::File::Find {
         return 0;
       }
     }
+    
+    return 1;
+  }
+  
+  static method find : int () {
     
     # prune
     {
