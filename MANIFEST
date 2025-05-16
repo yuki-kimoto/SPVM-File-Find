@@ -13,9 +13,8 @@ lib/SPVM/File/Find/Info.pm
 lib/SPVM/File/Find/Info.spvm
 LICENSE
 Makefile.PL
-MANIFEST
+MANIFEST			This list of files
 MANIFEST.SKIP
-original.txt
 README.md
 t/basic.t
 t/lib/SPVM/TestCase/File/Find.spvm
