@@ -48,7 +48,12 @@ class TestCase::File::Find {
       my $dir = "t/test_files2_link";
       
       warn "[Test Output]Sys->l(\"$dir\"):" . Sys->l($dir);
+      warn "[Test Output]Sys->stat(\"$dir\")->l:" . Sys->stat($dir)->l;
       warn "[Test Output]Sys->lstat(\"$dir\")->l:" . Sys->lstat($dir)->l;
+      
+      warn "[Test Output]Sys->d(\"$dir\"):" . Sys->d($dir);
+      warn "[Test Output]Sys->stat(\"$dir\")->d:" . Sys->stat($dir)->d;
+      warn "[Test Output]Sys->lstat(\"$dir\")->d:" . Sys->lstat($dir)->d;
       
       my $files_list = StringList->new;
       
