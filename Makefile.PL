@@ -27,7 +27,7 @@ WriteMakefile(
     (ABSTRACT_FROM  => 'lib/SPVM/File/Find.pm',
      AUTHOR         => 'Yuki Kimoto<kimoto.yuki@gmail.com>') : ()),
   test => {TESTS => 't/*.t t/*/*.t t/*/*/*.t'},
-  clean => {FILES => ['.spvm_build', 't/.spvm_build']},
+  clean => {FILES => ['.spvm_build', 't/.spvm_build', 't/.tmp', 't/*/.tmp']},
   META_MERGE => {
     'meta-spec' => { version => 2 },
     resources => {
