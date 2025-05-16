@@ -57,8 +57,46 @@ class TestCase::File::Find {
       {
         eval { Sys->mkdir("t/test_files3/.tmp"); }
         my $dup_dir = "t/test_files3/.tmp/dup";
-        my $dup_original_dir = "../..";
+        my $dup_original_dir = "..";
         eval { Sys->symlink($dup_original_dir, $dup_dir); }
+      }
+    }
+    
+    {
+      my $dir = "t/.tmp/test_files3_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({follow => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/.tmp/test_files3_link",
+        "t/.tmp/test_files3_link/.tmp",
+        "t/.tmp/test_files3_link/.tmp/dup",
+        "t/.tmp/test_files3_link/dir1",
+        "t/.tmp/test_files3_link/dir1/dir1",
+        "t/.tmp/test_files3_link/dir1/dir1/file1.txt",
+        "t/.tmp/test_files3_link/dir1/dir1/file2.txt",
+        "t/.tmp/test_files3_link/dir1/file1.txt",
+        "t/.tmp/test_files3_link/dir1/file2.txt",
+        "t/.tmp/test_files3_link/dir2",
+        "t/.tmp/test_files3_link/dir2/file1.txt",
+        "t/.tmp/test_files3_link/dir2/file2.txt",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
       }
     }
     
