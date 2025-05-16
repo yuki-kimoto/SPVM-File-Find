@@ -9,9 +9,7 @@ class TestCase::File::Find {
   static method test : int () {
     
     my $tmp_dir = "t/.tmp";
-    unless (Sys->e($tmp_dir)) {
-      Sys->mkdir($tmp_dir);
-    }
+    eval { Sys->mkdir($tmp_dir); }
     
     {
       my $original_dir = "../test_files2";
