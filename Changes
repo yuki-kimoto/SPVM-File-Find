@@ -3,6 +3,10 @@
     * Require SPVM::Sys 0.533.
   [Bug Fix]
     * Fix a bug that prune field does not work well.
+    * Fix some bugs of follow option.
+  [Internal Changes]
+    * Reduce stat call if possible.
+    
 0.028 2025-05-14
   [Incompatible Changes]
     * Remove bydepth option.
