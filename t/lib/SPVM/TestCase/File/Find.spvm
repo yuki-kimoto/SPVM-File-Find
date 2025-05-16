@@ -8,12 +8,12 @@ class TestCase::File::Find {
   
   static method test : int () {
     
+    my $tmp_dir = "t/.tmp";
+    unless (Sys->e($tmp_dir)) {
+      Sys->mkdir($tmp_dir);
+    }
+    
     {
-      my $tmp_dir = "t/.tmp";
-      unless (Sys->e($tmp_dir)) {
-        Sys->mkdir($tmp_dir);
-      }
-      
       my $original_dir = "../test_files2";
       my $dir = "t/.tmp/test_files2_link";
       
@@ -37,6 +37,28 @@ class TestCase::File::Find {
         warn "[Test Output]Sys->lstat(\"$dir\")->d:" . Sys->lstat($dir)->d;
         
         return 0;
+      }
+    }
+    
+    {
+      my $original_dir = "../test_files3";
+      my $dir = "t/.tmp/test_files3_link";
+      
+      my $dir_exists = 0;
+      eval { Sys->lstat($dir); }
+      unless ($@) {
+        $dir_exists = 1;
+      }
+      
+      unless ($dir_exists) {
+        Sys->symlink($original_dir, $dir);
+      }
+      
+      {
+        eval { Sys->mkdir("t/test_files3/.tmp"); }
+        my $dup_dir = "t/test_files3/.tmp/dup";
+        my $dup_original_dir = "../..";
+        eval { Sys->symlink($dup_original_dir, $dup_dir); }
       }
     }
     
