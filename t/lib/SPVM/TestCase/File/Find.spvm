@@ -15,15 +15,7 @@ class TestCase::File::Find {
       my $original_dir = "../test_files2";
       my $dir = "t/.tmp/test_files2_link";
       
-      my $dir_exists = 0;
-      eval { Sys->lstat($dir); }
-      unless ($@) {
-        $dir_exists = 1;
-      }
-      
-      unless ($dir_exists) {
-        Sys->symlink($original_dir, $dir);
-      }
+      eval { Sys->symlink($original_dir, $dir); }
       
       unless (Sys->l($dir)) {
         warn "[Test Output]Sys->l(\"$dir\"):" . Sys->l($dir);
@@ -42,15 +34,7 @@ class TestCase::File::Find {
       my $original_dir = "../test_files3";
       my $dir = "t/.tmp/test_files3_link";
       
-      my $dir_exists = 0;
-      eval { Sys->lstat($dir); }
-      unless ($@) {
-        $dir_exists = 1;
-      }
-      
-      unless ($dir_exists) {
-        Sys->symlink($original_dir, $dir);
-      }
+      eval { Sys->symlink($original_dir, $dir); }
       
       {
         eval { Sys->mkdir("t/test_files3/.tmp"); }
@@ -532,6 +516,12 @@ class TestCase::File::Find {
     }
     
     {
+      my $cwd = Cwd->getcwd;
+      
+      Fn->defer([$cwd : string] method : void () {
+        Sys::IO->chdir($cwd);
+      });
+      
       Sys::IO->chdir("t/test_files");
       my $dir = ".";
       
@@ -566,7 +556,6 @@ class TestCase::File::Find {
         warn dump $files;
         return 0;
       }
-      Sys::IO->chdir("..");
     }
     
     return 1;
