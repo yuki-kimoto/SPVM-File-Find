@@ -112,7 +112,7 @@ class File::Find {
       
       if ($@) {
         if ($warn) {
-          warn "Sys#lstat method failed. File:$dir, Error:$@";
+          warn "[Warning]Sys#lstat method failed. File:$dir, Message:\n----------\n$@\n----------";
         }
         next;
       }
@@ -127,7 +127,7 @@ class File::Find {
         
         if ($@) {
           if ($warn) {
-            warn "Sys#stat method failed. File:$dir, Error:$@";
+            warn "[Warning]Sys#stat method failed. File:$dir, Message:\n----------\n$@\n----------";
           }
           next;
         }
@@ -147,7 +147,7 @@ class File::Find {
         my $file_id = "$dev/$ino";
         if ($file_seen_h->exists($file_id)) {
           if ($warn) {
-            warn "The directory $dir has already been processed. st_dev:$dev, st_ino:$ino";
+            warn "[Warning]The directory $dir has already been processed. st_dev:$dev, st_ino:$ino";
           }
           next;
         }
@@ -161,7 +161,7 @@ class File::Find {
       eval { $dh = IO::Dir->new($dir); }
       if ($@) {
         if ($warn) {
-          warn "IO::Dir#new method failed. Directory:$dir, Error:$@";
+          warn "[Warning]IO::Dir#new method failed. Directory:$dir, Message:\n----------\n$@\n----------";
         }
         next;
       }
