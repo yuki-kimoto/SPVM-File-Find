@@ -6,7 +6,7 @@ class TestCase::File::Find {
   use Sys::IO;
   use Cwd;
   
-  static method test : int () {
+  static method prepare_symbolic_links : int () {
     
     my $tmp_dir = "t/.tmp";
     eval { Sys->mkdir($tmp_dir); }
@@ -60,6 +60,10 @@ class TestCase::File::Find {
       }
     }
     
+    return 1;
+  }
+  
+  static method test : int () {
     {
       my $dir = "t/.tmp/test_files3_link";
       
