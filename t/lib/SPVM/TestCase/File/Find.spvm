@@ -6,188 +6,6 @@ class TestCase::File::Find {
   use Sys::IO;
   use Cwd;
   
-  static method prepare_symbolic_links : int () {
-    
-    my $tmp_dir = "t/.tmp";
-    eval { Sys->mkdir($tmp_dir); }
-    
-    {
-      my $original_dir = "../test_files2";
-      my $dir = "t/.tmp/test_files2_link";
-      
-      eval { Sys->symlink($original_dir, $dir); }
-      
-      unless (Sys->l($dir)) {
-        warn "[Test Output]Sys->l(\"$dir\"):" . Sys->l($dir);
-        warn "[Test Output]Sys->stat(\"$dir\")->l:" . Sys->stat($dir)->l;
-        warn "[Test Output]Sys->lstat(\"$dir\")->l:" . Sys->lstat($dir)->l;
-        
-        warn "[Test Output]Sys->d(\"$dir\"):" . Sys->d($dir);
-        warn "[Test Output]Sys->stat(\"$dir\")->d:" . Sys->stat($dir)->d;
-        warn "[Test Output]Sys->lstat(\"$dir\")->d:" . Sys->lstat($dir)->d;
-        
-        return 0;
-      }
-    }
-    
-    {
-      my $original_dir = "../test_files3";
-      my $dir = "t/.tmp/test_files3_link";
-      
-      eval { Sys->symlink($original_dir, $dir); }
-      
-      {
-        eval { Sys->mkdir("t/test_files3/.tmp"); }
-        my $dup_dir = "t/test_files3/.tmp/dup";
-        my $dup_original_dir = "..";
-        eval { Sys->symlink($dup_original_dir, $dup_dir); }
-      }
-    }
-    
-    return 1;
-  }
-  
-  static method find_follow : int () {
-    {
-      my $dir = "t/.tmp/test_files3_link";
-      
-      my $files_list = StringList->new;
-      
-      File::Find->new({follow => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $name = $info->name;
-        
-        $self->{files_list}->push($name);
-        
-      }, $dir);
-      
-      my $files = $files_list->to_array;
-      
-      Sort->sort_string_asc($files);
-      
-      my $files_expected = [
-        "t/.tmp/test_files3_link",
-        "t/.tmp/test_files3_link/.tmp",
-        "t/.tmp/test_files3_link/.tmp/dup",
-        "t/.tmp/test_files3_link/dir1",
-        "t/.tmp/test_files3_link/dir1/dir1",
-        "t/.tmp/test_files3_link/dir1/dir1/file1.txt",
-        "t/.tmp/test_files3_link/dir1/dir1/file2.txt",
-        "t/.tmp/test_files3_link/dir1/file1.txt",
-        "t/.tmp/test_files3_link/dir1/file2.txt",
-        "t/.tmp/test_files3_link/dir2",
-        "t/.tmp/test_files3_link/dir2/file1.txt",
-        "t/.tmp/test_files3_link/dir2/file2.txt",
-      ];
-      
-      unless (Array->equals_string($files, $files_expected)) {
-        warn dump $files;
-        return 0;
-      }
-    }
-    
-    {
-      my $dir = "t/.tmp/test_files2_link";
-      
-      my $files_list = StringList->new;
-      
-      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $name = $info->name;
-        
-        $self->{files_list}->push($name);
-        
-      }, $dir);
-      
-      my $files = $files_list->to_array;
-      
-      Sort->sort_string_asc($files);
-      
-      my $files_expected = [
-        "t/.tmp/test_files2_link",
-        "t/.tmp/test_files2_link/dir1",
-        "t/.tmp/test_files2_link/dir1/dir1",
-        "t/.tmp/test_files2_link/dir1/dir1/file1.txt",
-        "t/.tmp/test_files2_link/dir1/dir1/file2.txt",
-        "t/.tmp/test_files2_link/dir1/file1.txt",
-        "t/.tmp/test_files2_link/dir1/file2.txt",
-        "t/.tmp/test_files2_link/dir2",
-        "t/.tmp/test_files2_link/dir2/file1.txt",
-        "t/.tmp/test_files2_link/dir2/file2.txt",
-      ];
-      
-      unless (Array->equals_string($files, $files_expected)) {
-        warn dump $files;
-        return 0;
-      }
-    }
-    
-    {
-      my $dir = "t/.tmp/test_files2_link";
-      
-      my $files_list = StringList->new;
-      
-      File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $name = $info->name;
-        
-        $self->{files_list}->push($name);
-        
-      }, $dir);
-      
-      my $files = $files_list->to_array;
-      
-      Sort->sort_string_asc($files);
-      
-      my $files_expected = [
-        "t/.tmp/test_files2_link",
-      ];
-      
-      unless (Array->equals_string($files, $files_expected)) {
-        warn dump $files;
-        return 0;
-      }
-    }
-    
-    {
-      my $dir = "t/test_files";
-      
-      my $files_list = StringList->new;
-      
-      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
-        
-        my $name = $info->name;
-        
-        $self->{files_list}->push($name);
-        
-      }, $dir);
-      
-      my $files = $files_list->to_array;
-      
-      Sort->sort_string_asc($files);
-      
-      my $files_expected = [
-        "t/test_files",
-        "t/test_files/dir1",
-        "t/test_files/dir1/dir1",
-        "t/test_files/dir1/dir1/file1.txt",
-        "t/test_files/dir1/dir1/file2.txt",
-        "t/test_files/dir1/file1.txt",
-        "t/test_files/dir1/file2.txt",
-        "t/test_files/dir2",
-        "t/test_files/dir2/file1.txt",
-        "t/test_files/dir2/file2.txt",
-      ];
-      
-      unless (Array->equals_string($files, $files_expected)) {
-        warn dump $files;
-        return 0;
-      }
-    }
-    
-    return 1;
-  }
-  
   static method find : int () {
     
     # prune
@@ -560,4 +378,187 @@ class TestCase::File::Find {
     
     return 1;
   }
+  
+  static method prepare_symbolic_links : int () {
+    
+    my $tmp_dir = "t/.tmp";
+    eval { Sys->mkdir($tmp_dir); }
+    
+    {
+      my $original_dir = "../test_files2";
+      my $dir = "t/.tmp/test_files2_link";
+      
+      eval { Sys->symlink($original_dir, $dir); }
+      
+      unless (Sys->l($dir)) {
+        warn "[Test Output]Sys->l(\"$dir\"):" . Sys->l($dir);
+        warn "[Test Output]Sys->stat(\"$dir\")->l:" . Sys->stat($dir)->l;
+        warn "[Test Output]Sys->lstat(\"$dir\")->l:" . Sys->lstat($dir)->l;
+        
+        warn "[Test Output]Sys->d(\"$dir\"):" . Sys->d($dir);
+        warn "[Test Output]Sys->stat(\"$dir\")->d:" . Sys->stat($dir)->d;
+        warn "[Test Output]Sys->lstat(\"$dir\")->d:" . Sys->lstat($dir)->d;
+        
+        return 0;
+      }
+    }
+    
+    {
+      my $original_dir = "../test_files3";
+      my $dir = "t/.tmp/test_files3_link";
+      
+      eval { Sys->symlink($original_dir, $dir); }
+      
+      {
+        eval { Sys->mkdir("t/test_files3/.tmp"); }
+        my $dup_dir = "t/test_files3/.tmp/dup";
+        my $dup_original_dir = "..";
+        eval { Sys->symlink($dup_original_dir, $dup_dir); }
+      }
+    }
+    
+    return 1;
+  }
+  
+  static method find_follow : int () {
+    {
+      my $dir = "t/.tmp/test_files3_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({follow => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/.tmp/test_files3_link",
+        "t/.tmp/test_files3_link/.tmp",
+        "t/.tmp/test_files3_link/.tmp/dup",
+        "t/.tmp/test_files3_link/dir1",
+        "t/.tmp/test_files3_link/dir1/dir1",
+        "t/.tmp/test_files3_link/dir1/dir1/file1.txt",
+        "t/.tmp/test_files3_link/dir1/dir1/file2.txt",
+        "t/.tmp/test_files3_link/dir1/file1.txt",
+        "t/.tmp/test_files3_link/dir1/file2.txt",
+        "t/.tmp/test_files3_link/dir2",
+        "t/.tmp/test_files3_link/dir2/file1.txt",
+        "t/.tmp/test_files3_link/dir2/file2.txt",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
+      my $dir = "t/.tmp/test_files2_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/.tmp/test_files2_link",
+        "t/.tmp/test_files2_link/dir1",
+        "t/.tmp/test_files2_link/dir1/dir1",
+        "t/.tmp/test_files2_link/dir1/dir1/file1.txt",
+        "t/.tmp/test_files2_link/dir1/dir1/file2.txt",
+        "t/.tmp/test_files2_link/dir1/file1.txt",
+        "t/.tmp/test_files2_link/dir1/file2.txt",
+        "t/.tmp/test_files2_link/dir2",
+        "t/.tmp/test_files2_link/dir2/file1.txt",
+        "t/.tmp/test_files2_link/dir2/file2.txt",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
+      my $dir = "t/.tmp/test_files2_link";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/.tmp/test_files2_link",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    {
+      my $dir = "t/test_files";
+      
+      my $files_list = StringList->new;
+      
+      File::Find->new({follow => 1, warn => 1})->find([has files_list : StringList = $files_list] method : void ($info : File::Find::Info) {
+        
+        my $name = $info->name;
+        
+        $self->{files_list}->push($name);
+        
+      }, $dir);
+      
+      my $files = $files_list->to_array;
+      
+      Sort->sort_string_asc($files);
+      
+      my $files_expected = [
+        "t/test_files",
+        "t/test_files/dir1",
+        "t/test_files/dir1/dir1",
+        "t/test_files/dir1/dir1/file1.txt",
+        "t/test_files/dir1/dir1/file2.txt",
+        "t/test_files/dir1/file1.txt",
+        "t/test_files/dir1/file2.txt",
+        "t/test_files/dir2",
+        "t/test_files/dir2/file1.txt",
+        "t/test_files/dir2/file2.txt",
+      ];
+      
+      unless (Array->equals_string($files, $files_expected)) {
+        warn dump $files;
+        return 0;
+      }
+    }
+    
+    return 1;
+  }
+  
 }
