@@ -166,8 +166,7 @@ class File::Find {
         next;
       }
       
-      while (my $dirent = $dh->read) {
-        my $base_name = $dirent->d_name;
+      while (my $base_name = $dh->read) {
         
         if (Re->m($base_name, $self->{skip_pattern})) {
           next;

@@ -49,7 +49,7 @@ WriteMakefile(
     %configure_and_runtime_requires,
     'SPVM::Sys' => '0.533',
     'SPVM::Regex' => '0.246',
-    'SPVM::IO' => '0.236',
+    'SPVM::IO' => '0.237',
   },
   TEST_REQUIRES => {
     'SPVM::File::Spec' => '0.087',
